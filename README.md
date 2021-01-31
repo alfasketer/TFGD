@@ -1,2 +1,2 @@
-# TFGD
-Touch Fuzzy, Get Dizzy: A Fuzzy number calculator
+# Touch Fuzzy, Get Dizzy
+A Fuzzy number calculator
