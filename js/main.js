@@ -290,8 +290,102 @@ GLViewport.prototype.getIntersectData = function(z) {
 	return data
 }
 
+GLViewport.prototype.get2LUnionData = function(z) {
+	let left = [Math.min(this.sets[0].points[0], this.sets[1].points[0]), Math.max(this.sets[0].points[0], this.sets[1].points[0])]
+	let right = [Math.min(this.sets[0].points[1], this.sets[1].points[1]), Math.max(this.sets[0].points[1], this.sets[1].points[1])]
+	let complex = false
+
+	if(this.sets[0].points[0] > this.sets[1].points[0] && this.sets[0].points[1] < this.sets[1].points[1]) complex = true
+	if(this.sets[1].points[0] > this.sets[0].points[0] && this.sets[1].points[1] < this.sets[0].points[1]) complex = true
+
+	let data = [
+		-999.00, 1.0, z,
+		-999.00, 0.0, z,
+		left[1], 1.0, z,
+		left[1], 0.0, z
+	]
+
+	if (complex) {
+		let k = (right[1]-right[0])/(right[1]-right[0]+left[1]-left[0])
+		let newx = right[1] - k * (right[1]-left[0])
+		data.push(newx, k, z, newx, 0.0, z)
+	}
+
+	data.push(right[1], 0.0, z)
+	return data
+}
+
+GLViewport.prototype.get2RUnionData = function(z) {
+	let left = [Math.min(this.sets[0].points[0], this.sets[1].points[0]), Math.max(this.sets[0].points[0], this.sets[1].points[0])]
+	let right = [Math.min(this.sets[0].points[1], this.sets[1].points[1]), Math.max(this.sets[0].points[1], this.sets[1].points[1])]
+	let complex = false
+
+	if(this.sets[0].points[0] > this.sets[1].points[0] && this.sets[0].points[1] < this.sets[1].points[1]) complex = true
+	if(this.sets[1].points[0] > this.sets[0].points[0] && this.sets[1].points[1] < this.sets[0].points[1]) complex = true
+
+	let data = [
+		left[0], 0.0, z
+	]
+
+	if (complex) {
+		let k = (right[1]-right[0])/(right[1]-right[0]+left[1]-left[0])
+		let newx = right[1] - k * (right[1]-left[0])
+		data.push(newx, k, z, newx, 0.0, z)
+	}
+
+	data.push(right[0], 1.0, z)
+	data.push(right[0], 0.0, z)
+	data.push(999.0, 1.0, z)
+	data.push(999.0, 0.0, z)
+	return data
+}
+
 GLViewport.prototype.getUnionData = function(z) {
-	return []
+	let set1 = [this.sets[0].alphaCut(0, 0), this.sets[0].alphaCut(0, 1)]
+	let set2 = [this.sets[1].alphaCut(0, 0), this.sets[1].alphaCut(0, 1)]
+
+	let empty = true
+
+	if (this.sets[0].type == lSet && set2[0]<set1[1]) empty = false
+	if (this.sets[1].type == lSet && set1[0]<set2[1]) empty = false
+	if (this.sets[0].type == rSet && set2[1]>set1[0]) empty = false
+	if (this.sets[1].type == rSet && set1[1]>set2[0]) empty = false
+	if (set2[0] <= set1[0] && set1[0] < set2[1])      empty = false
+	if (set1[0] <= set2[0] && set2[0] < set1[1])      empty = false
+
+	if (empty) {
+		alert("Intersection is empty")
+		return []
+	}
+
+	if (this.sets[0].type == lSet && this.sets[1].type == lSet) return this.get2LUnionData(z)
+	if (this.sets[0].type == rSet && this.sets[1].type == rSet) return this.get2RUnionData(z)
+
+
+	let llimit
+	let rlimit
+	let data = []
+
+	llimit = Math.min(set1[0], set2[0])
+	rlimit = Math.max(set1[1], set2[1])
+
+	console.log(llimit, rlimit)
+
+	if (this.sets[0].type == lSet || this.sets[1].type == lSet)
+		data.push(-999.0, 1.0, z, -999, 0.0, z, llimit, 1.0, z)
+
+	data.push(llimit, 0.0, z)
+	for (i = 1; i < fillLimit; i++) {
+		let x = llimit + (rlimit-llimit)*i/fillLimit
+		let y = Math.max(this.sets[0].muFunction(x), this.sets[1].muFunction(x))
+		data.push(x, y, z, x, 0.0, z)
+	}
+
+	if (this.sets[0].type == rSet || this.sets[1].type == rSet)
+		data.push(rlimit, 1.0, z, rlimit, 0.0, z, 999.0, 1.0, z, 999.0, 0.0, z)
+	else data.push(rlimit, 0.0, z)
+
+	return data
 }
 
 GLViewport.prototype.getInvertData = function(z) {
