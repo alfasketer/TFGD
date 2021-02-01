@@ -2,11 +2,100 @@
 <head>
 	<meta charset="UTF-8">
     <title>Touch Fuzzy, Get Dizzy</title>
-    <!-- <link rel="stylesheet" href="css/style.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> -->
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/webgl-fmi.js"></script>	
+
+    <script id="vshader" type="x-shader/x-vertex">
+		uniform mat4 uProjectionMatrix;
+		uniform mat4 uViewMatrix;
+		uniform mat4 uModelMatrix;
+		attribute vec3 aXYZ;
+		void main ()
+		{
+			gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aXYZ,1);
+		}
+	</script>
+	
+	<script id="fshader" type="x-shader/x-fragment">
+		precision mediump float;
+		uniform vec3 uColor;
+		void main( )
+		{
+			gl_FragColor = vec4(uColor,1);
+		}
+	</script>
 </head>
 
 <body>
+	<div id="inputs">
+		<h1>Fuzzy Number Calculator</h1>
+		<label for="Operations">Choose an operations:</label>
+		<select name="Operations" id="op">
+			<option value=0>Sum</option>
+			<option value=1>Subtraction</option>
+			<option value=5>Aproximated Multiplication</option>
+			<option value=2>Stepwise Multiplication</option>
+			<option value=6>Aproximated Division(A/B)</option>
+			<option value=3>Stepwise Division(A/B)</option>
+			<option value=7>Aproximated Division(B/A)</option>
+			<option value=4>Stepwise Division(B/A)</option>
+		</select>
 
+		<div id="sets">
+			<div class="fuzzyset">
+				<label for="Set1">Fuzzy Set A:</label>
+				<select name="Set1" id="set1" onchange="changeSetSelect(1)">
+					<option value="0">Triangular</option>
+					<option value="1" selected = "selected">Trapezoid</option>
+					<option value="2">Gaussian</option>
+				</select>
+				<br><br>
+				<img src="css/img/Trap.png" id="Formula1">
+				<table>
+					<tr id="row11"><td>a</td><td><input type="number" id="input11" value=1></td></tr>
+					<tr id="row12"><td>b</td><td><input type="number" id="input12" value=2></td></tr>
+					<tr id="row13"><td>c</td><td><input type="number" id="input13" value=3></td></tr>
+					<tr id="row14"><td>d</td><td><input type="number" id="input14" value=4></td></tr>
+				</table>
+			</div>
+
+			<div class="fuzzyset">
+				<label for="Set2">Fuzzy Set B:</label>
+				<select name="Set2" id="set2" onchange="changeSetSelect(2)">
+					<option value="0">Triangular</option>
+					<option value="1" selected = "selected">Trapezoid</option>
+					<option value="2">Gaussian</option>
+				</select>
+				<br><br>
+				<img src="css/img/Trap.png" id="Formula2">
+				<table>
+					<tr id="row21"><td>a</td><td><input type="number" id="input21" value=1></td></tr>
+					<tr id="row22"><td>b</td><td><input type="number" id="input22" value=2></td></tr>
+					<tr id="row23"><td>c</td><td><input type="number" id="input23" value=3></td></tr>
+					<tr id="row24"><td>d</td><td><input type="number" id="input24" value=4></td></tr>
+				</table>
+			</div>
+		</div>
+
+		<button onclick="generate()">Generate!</button>
+		<h2 id="message"></h2>
+	</div>
+    <div id="canvas-container">
+		<table>
+			<tr class="side"><th>1.0</th></tr>
+			<tr class="side"><th>0.8</th></tr>
+			<tr class="side"><th>0.6</th></tr>
+			<tr class="side"><th>0.4</th></tr>
+			<tr class="side"><th>0.2</th></tr>
+			<tr class="side"><th>0.0</th></tr>
+		</table>
+		<div>
+			<canvas id="gl-canvas" width="1200" height="176"></canvas>
+			<div id="bottom-table">
+				<p id="bottom-left">a</p>
+				<p id="bottom-right">b</p>
+			</table>
+		</div>
+    </div>
 	<script src="js/main.js"></script>
 </body>

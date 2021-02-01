@@ -1,0 +1,63 @@
+canvas {
+	display: block;
+	left: 2em;
+	top: 2em;
+	border: 2px solid #000000;
+	margin-left: 3px;
+	margin-top: 14px;
+}
+
+th {
+	width: 80px;
+	margin: 0;
+	padding: 0;
+	text-align: left;
+}
+
+table {
+	border-collapse: collapse;
+	width: max-content;
+	height: max-content;
+	margin: 0;
+	padding: 0;
+	margin-top: 8px;
+}
+
+tr {
+	margin: 0;
+	padding: 0;
+}
+
+.side {
+	height: 32px;
+}
+.side th {
+	width: 25px;
+}
+
+#canvas-container {
+	display: none;
+	overflow-x: auto;
+}
+
+#bottom-left {
+	float: left;
+	font-weight: bold;
+}
+
+#bottom-right {
+	float: right;
+	font-weight: bold;
+}
+
+#sets {
+	display: flex;
+}
+
+.fuzzyset {
+	margin: 20px
+}
+
+.fuzzyset td{
+	margin-bottom: 40px;
+}
