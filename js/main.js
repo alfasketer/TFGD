@@ -144,8 +144,6 @@ GLViewport.prototype.getApprData = function(value) {
 				newarr.push(this.sets[1].alphaCut(value, i)/this.sets[0].alphaCut(value, j))
 		}
 	}
-		
-	//console.log(newarr)
 
 	return [Math.min.apply(Math, newarr), Math.max.apply(Math, newarr)]
 }
@@ -185,8 +183,6 @@ GLViewport.prototype.setOperationData = function(z) {
 	if(this.operation>divide) limit = 1
 	data.push(-999.00, 0.0, z)
 
-	console.log(this.getApprData(0.2, 0))
-
 	i = 0
 	while (true) {
 		points.push(this.getApprData(i/limit))
@@ -204,8 +200,17 @@ GLViewport.prototype.setOperationData = function(z) {
 	return data
 }
 
+GLViewport.prototype.getInvertData = function(z) {
+	let data = this.sets[0].getData(z)
+	for(i=1; i<data.length; i+=3) {
+		data[i] = 1-data[i]
+	}
+	return data
+}
+
 GLViewport.prototype.getOperationData = function(z) {
-	if (this.operation < 80) return this.alphaOperationData(z)
+	if (this.operation < intersect) return this.alphaOperationData(z)
+	if (this.operation == invert) return this.getInvertData(z)
 	return this.setOperationData(z)
 }
 
@@ -251,10 +256,15 @@ GLViewport.prototype.setViewport = function() {
 	let set1 = [this.sets[0].alphaCut(0, 0), this.sets[0].alphaCut(0, 1)]
 	let set2 = [this.sets[1].alphaCut(0, 0), this.sets[1].alphaCut(0, 1)]
 
-	let larr = [set1[0], set2[0]]
-	let rarr = [set1[1], set2[1]]
+	let larr = [set1[0]]
+	let rarr = [set1[1]]
 
-	if(this.operation < 80) {
+	if(this.operation != invert) {
+		larr.push(set2[0])
+		rarr.push(set2[1])
+	}
+
+	if(this.operation < intersect) {
 		let set3 = this.getThirdCut(set1, set2)
 		larr.push(set3[0])
 		rarr.push(set3[1])
