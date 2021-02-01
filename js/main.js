@@ -1,8 +1,8 @@
 const triSet    = 0 //triangular fuzzy set
 const trapSet   = 1 //trapezoid fuzzy set
 const gausSet   = 2 //gausian fuzzy set
-const rSet      = 98 //r-function fuzzy set
-const lSet      = 99 //l-function fuzzy set
+const lSet      = 98 //l-function fuzzy set
+const rSet      = 99 //r-function fuzzy set
 
 const sum       = 0
 const subtract  = 1
@@ -13,8 +13,12 @@ const simplemul = 5
 const simplediv = 6
 const simplrdiv = 7
 
+const intersect = 81
+const union     = 82
+const invert    = 83
+
 const glPadding = 0.5
-const gausLimit = 500
+const gausLimit = 160
 const eps       = 0.001
 const cellSize  = 80
 
@@ -58,6 +62,30 @@ FuzzyNum.prototype.alphaCut = function(alpha, side) {
 		let cut = Math.sqrt(-2 * this.points[1] * this.points[1] * loga)
 		if (side == 0) return this.points[0] - cut
 		else return this.points[0] + cut
+	}
+}
+
+FuzzyNum.prototype.muFunction = function(x) {
+	if (this.type == triSet) {
+		let sideA = (x-this.points[0])/(this.points[1]-this.points[0])
+		let sideB = (this.points[2]-x)/(this.points[2]-this.points[1])
+		return Math.max(0, Math.min(sideA, sideB))
+	}
+	else if (this.type == trapSet) {
+		let sideA = (x-this.points[0])/(this.points[1]-this.points[0])
+		let sideB = (this.points[3]-x)/(this.points[3]-this.points[2])
+		return Math.max(0, Math.min(1, sideA, sideB))
+	}
+	else if (this.type == gausSet) {
+		return Math.exp(-1 * (x-this.points[0])*(x-this.points[0])/(2*this.points[1]*this.points[1]))
+	}
+	else if (this.type == lSet) {
+		let val = (this.points[1]-x)/(this.points[1]-this.points[0])
+		return Math.max(0, Math.min(1, val))
+	}
+	else if (this.type == rSet) {
+		let val = (x-this.points[0])/(this.points[1]-this.points[0])
+		return Math.max(0, Math.min(1, val))
 	}
 }
 
@@ -122,7 +150,7 @@ GLViewport.prototype.getApprData = function(value) {
 	return [Math.min.apply(Math, newarr), Math.max.apply(Math, newarr)]
 }
 
-GLViewport.prototype.getOperationData = function(z) {
+GLViewport.prototype.alphaOperationData = function(z) {
 	let points = []
 	let data = []
 	let i
@@ -147,6 +175,38 @@ GLViewport.prototype.getOperationData = function(z) {
 	}
 	data.push(999.00, 0.0, z)
 	return data
+}
+
+GLViewport.prototype.setOperationData = function(z) {
+	let points = []
+	let data = []
+	let i
+	let limit = gausLimit
+	if(this.operation>divide) limit = 1
+	data.push(-999.00, 0.0, z)
+
+	console.log(this.getApprData(0.2, 0))
+
+	i = 0
+	while (true) {
+		points.push(this.getApprData(i/limit))
+		i++
+		if (i > limit) break
+	}
+
+	for(i = 0; i <= limit; i++) {
+		data.push(points[i][0], i/limit, z)
+	}
+	for(i = limit; i >= 0; i--) {
+		data.push(points[i][1], i/limit, z)
+	}
+	data.push(999.00, 0.0, z)
+	return data
+}
+
+GLViewport.prototype.getOperationData = function(z) {
+	if (this.operation < 80) return this.alphaOperationData(z)
+	return this.setOperationData(z)
 }
 
 GLViewport.prototype.addSet = function(set) {
@@ -191,10 +251,14 @@ GLViewport.prototype.setViewport = function() {
 	let set1 = [this.sets[0].alphaCut(0, 0), this.sets[0].alphaCut(0, 1)]
 	let set2 = [this.sets[1].alphaCut(0, 0), this.sets[1].alphaCut(0, 1)]
 
-	let set3 = this.getThirdCut(set1, set2)
-	let larr = [set1[0], set2[0], set3[0]]
-	let rarr = [set1[1], set2[1], set3[1]]
+	let larr = [set1[0], set2[0]]
+	let rarr = [set1[1], set2[1]]
 
+	if(this.operation < 80) {
+		let set3 = this.getThirdCut(set1, set2)
+		larr.push(set3[0])
+		rarr.push(set3[1])
+	}
 
 	let left = Math.min.apply(Math, larr)
 	let right = Math.max.apply(Math, rarr)
@@ -274,16 +338,18 @@ GLViewport.prototype.draw = function() {
 	gl.drawArrays(gl.LINE_STRIP,0,data.length/3)
 
 	// второ множество
-	data = this.sets[1].getData(-1.0)
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
-
-	identity()
-	zRotate(-90)
-	translate([-this.center, -0.5, 0])
-
-	useMatrix()
-	gl.uniform3f(uColor,0,1,0)
-	gl.drawArrays(gl.LINE_STRIP,0,data.length/3)
+	if (this.operation != invert) {
+		data = this.sets[1].getData(-1.0)
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
+	
+		identity()
+		zRotate(-90)
+		translate([-this.center, -0.5, 0])
+	
+		useMatrix()
+		gl.uniform3f(uColor,0,1,0)
+		gl.drawArrays(gl.LINE_STRIP,0,data.length/3)
+	}
 
 	//операция
 	data = this.getOperationData(0.0)
@@ -300,20 +366,65 @@ GLViewport.prototype.draw = function() {
 
 function changeSetSelect(i) {
 	let val = document.getElementById("set" + i).value 
-	if(val==0) {
+	if (val==triSet) {
 		document.getElementById("row" + i + "3").style.display = "table-row"
 		document.getElementById("row" + i + "4").style.display = "none"
 		document.getElementById("Formula" + i).src = "css/img/Tri.png"
 	}
-	else if(val == 2) {
+	else if(val == trapSet){
+		document.getElementById("row" + i + "3").style.display = "table-row"
+		document.getElementById("row" + i + "4").style.display = "table-row"
+		document.getElementById("Formula" + i).src = "css/img/Trap.png"
+	}
+	else if(val == gausSet) {
 		document.getElementById("row" + i + "3").style.display = "none"
 		document.getElementById("row" + i + "4").style.display = "none"
 		document.getElementById("Formula" + i).src = "css/img/Gauss.png"
 	}
-	else {
-		document.getElementById("row" + i + "3").style.display = "table-row"
-		document.getElementById("row" + i + "4").style.display = "table-row"
-		document.getElementById("Formula" + i).src = "css/img/Trap.png"
+	else if(val == lSet) {
+		document.getElementById("row" + i + "3").style.display = "none"
+		document.getElementById("row" + i + "4").style.display = "none"
+		document.getElementById("Formula" + i).src = "css/img/Lset.png"
+	}
+	else if(val == rSet) {
+		document.getElementById("row" + i + "3").style.display = "none"
+		document.getElementById("row" + i + "4").style.display = "none"
+		document.getElementById("Formula" + i).src = "css/img/Rset.png"
+	}
+}
+
+function changeOpSelect() {
+	let val = parseInt(document.getElementById("op").value)
+	if (val==invert) document.getElementById("fset2").style.display = "none"
+	else document.getElementById("fset2").style.display = "block"
+	if (val < 80 && lrAllowed) {
+		document.getElementById("set1").remove(3);
+		document.getElementById("set1").remove(3);
+		document.getElementById("set2").remove(3);
+		document.getElementById("set2").remove(3);
+		changeSetSelect(1)
+		changeSetSelect(2)
+		lrAllowed = false
+	}
+	else if (val >= 80 && !lrAllowed) {	
+		let field
+		let option
+
+		for(i=1; i<=2; i++){
+			field = document.getElementById("set" + i)
+		
+			option = document.createElement("option");
+			option.text = "L-Fuzzy Set";
+			option.value = "98"
+			field.add(option);
+
+			option = document.createElement("option");
+			option.text = "R-Fuzzy Set";
+			option.value = "99"
+			field.add(option);
+		}
+
+		lrAllowed = true
 	}
 }
 
@@ -371,4 +482,6 @@ function generate() {
 	document.getElementById("canvas-container").style.display = "flex"
 }
 
+lrAllowed = false
 vptest = new GLViewport()
+

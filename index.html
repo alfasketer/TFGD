@@ -30,15 +30,18 @@
 	<div id="inputs">
 		<h1>Fuzzy Number Calculator</h1>
 		<label for="Operations">Choose an operations:</label>
-		<select name="Operations" id="op">
-			<option value=0>Sum</option>
-			<option value=1>Subtraction</option>
-			<option value=5>Aproximated Multiplication</option>
-			<option value=2>Stepwise Multiplication</option>
-			<option value=6>Aproximated Division(A/B)</option>
-			<option value=3>Stepwise Division(A/B)</option>
-			<option value=7>Aproximated Division(B/A)</option>
-			<option value=4>Stepwise Division(B/A)</option>
+		<select name="Operations" id="op" onchange="changeOpSelect(1)">
+			<option value=0>α-cut Sum</option>
+			<option value=1>α-cut Subtraction</option>
+			<option value=5>α-cut Aproximated Multiplication</option>
+			<option value=2>α-cut Continuous Multiplication</option>
+			<option value=6>α-cut Aproximated Division(A/B)</option>
+			<option value=3>α-cut Continuous Division(A/B)</option>
+			<option value=7>α-cut Aproximated Division(B/A)</option>
+			<option value=4>α-cut Continuous Division(B/A)</option>
+			<option value=81>Intersection</option>
+			<option value=82>Union</option>
+			<option value=83>Inverse</option>
 		</select>
 
 		<div id="sets">
@@ -59,7 +62,7 @@
 				</table>
 			</div>
 
-			<div class="fuzzyset">
+			<div class="fuzzyset" id="fset2">
 				<label for="Set2">Fuzzy Set B:</label>
 				<select name="Set2" id="set2" onchange="changeSetSelect(2)">
 					<option value="0">Triangular</option>
