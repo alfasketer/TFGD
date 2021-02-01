@@ -19,6 +19,7 @@ const invert    = 83
 
 const glPadding = 0.5
 const gausLimit = 160
+const fillLimit = 1200
 const eps       = 0.001
 const cellSize  = 80
 
@@ -55,7 +56,7 @@ FuzzyNum.prototype.alphaCut = function(alpha, side) {
 		if (side == 0) return (this.points[1] - this.points[0]) * alpha + this.points[0]
 		else return this.points[3] - alpha * (this.points[3] - this.points[2])
 	}
-	else {
+	else if (this.type == gausSet) {
 		let loga
 		if (alpha == 0) loga =  Math.log(alpha + eps)
 		else loga = Math.log(alpha)
@@ -63,6 +64,7 @@ FuzzyNum.prototype.alphaCut = function(alpha, side) {
 		if (side == 0) return this.points[0] - cut
 		else return this.points[0] + cut
 	}
+	else if (this.type == lSet || this.type == rSet) return this.points[side]
 }
 
 FuzzyNum.prototype.muFunction = function(x) {
@@ -110,7 +112,7 @@ FuzzyNum.prototype.getData = function(z) {
 			999.00, 0.0, z
 		]
 	}
-	else {
+	else if (this.type == gausSet) {
 		data = []
 		data.push(-999.00, 0.0, z)
 		for(i = 0; i < gausLimit; i++) {
@@ -123,6 +125,22 @@ FuzzyNum.prototype.getData = function(z) {
 			data.push(this.alphaCut(i/gausLimit, 1), i/gausLimit, z)
 		}
 		data.push(999.00, 0.0, z)
+	}
+	else if (this.type == lSet) {
+		data = [
+			-999.00, 1.0, z,
+			this.points[0].toFixed(2), 1.0, z,
+			this.points[1].toFixed(2), 0.0, z,
+			999.00, 0.0, z
+		]
+	}
+	else if (this.type == rSet) {
+		data = [
+			-999.00, 0.0, z,
+			this.points[0].toFixed(2), 0.0, z,
+			this.points[1].toFixed(2), 1.0, z,
+			999.00, 1.0, z
+		]
 	}
 	return data
 }
@@ -175,29 +193,105 @@ GLViewport.prototype.alphaOperationData = function(z) {
 	return data
 }
 
-GLViewport.prototype.setOperationData = function(z) {
-	let points = []
-	let data = []
-	let i
-	let limit = gausLimit
-	if(this.operation>divide) limit = 1
-	data.push(-999.00, 0.0, z)
+GLViewport.prototype.get2LIntersectData = function(z) {
+	let left = [Math.min(this.sets[0].points[0], this.sets[1].points[0]), Math.max(this.sets[0].points[0], this.sets[1].points[0])]
+	let right = [Math.min(this.sets[0].points[1], this.sets[1].points[1]), Math.max(this.sets[0].points[1], this.sets[1].points[1])]
+	let complex = false
 
-	i = 0
-	while (true) {
-		points.push(this.getApprData(i/limit))
-		i++
-		if (i > limit) break
+	if(this.sets[0].points[0] > this.sets[1].points[0] && this.sets[0].points[1] < this.sets[1].points[1]) complex = true
+	if(this.sets[1].points[0] > this.sets[0].points[0] && this.sets[1].points[1] < this.sets[0].points[1]) complex = true
+
+	let data = [
+		-999.00, 1.0, z,
+		-999.00, 0.0, z,
+		left[0], 1.0, z,
+		left[0], 0.0, z
+	]
+
+	if (complex) {
+		let k = (right[1]-right[0])/(right[1]-right[0]+left[1]-left[0])
+		let newx = right[1] - k * (right[1]-left[0])
+		data.push(newx, k, z, newx, 0.0, z)
 	}
 
-	for(i = 0; i <= limit; i++) {
-		data.push(points[i][0], i/limit, z)
-	}
-	for(i = limit; i >= 0; i--) {
-		data.push(points[i][1], i/limit, z)
-	}
-	data.push(999.00, 0.0, z)
+	data.push(right[0], 0.0, z)
 	return data
+}
+
+GLViewport.prototype.get2RIntersectData = function(z) {
+	let left = [Math.min(this.sets[0].points[0], this.sets[1].points[0]), Math.max(this.sets[0].points[0], this.sets[1].points[0])]
+	let right = [Math.min(this.sets[0].points[1], this.sets[1].points[1]), Math.max(this.sets[0].points[1], this.sets[1].points[1])]
+	let complex = false
+
+	if(this.sets[0].points[0] > this.sets[1].points[0] && this.sets[0].points[1] < this.sets[1].points[1]) complex = true
+	if(this.sets[1].points[0] > this.sets[0].points[0] && this.sets[1].points[1] < this.sets[0].points[1]) complex = true
+
+	let data = [
+		left[1], 0.0, z
+	]
+
+	if (complex) {
+		let k = (right[1]-right[0])/(right[1]-right[0]+left[1]-left[0])
+		let newx = right[1] - k * (right[1]-left[0])
+		data.push(newx, k, z, newx, 0.0, z)
+	}
+
+	data.push(right[1], 1.0, z)
+	data.push(right[1], 0.0, z)
+	data.push(999.0, 1.0, z)
+	data.push(999.0, 0.0, z)
+	return data
+}
+
+GLViewport.prototype.getIntersectData = function(z) {
+	let set1 = [this.sets[0].alphaCut(0, 0), this.sets[0].alphaCut(0, 1)]
+	let set2 = [this.sets[1].alphaCut(0, 0), this.sets[1].alphaCut(0, 1)]
+
+	let empty = true
+
+	if (this.sets[0].type == lSet && set2[0]<set1[1]) empty = false
+	if (this.sets[1].type == lSet && set1[0]<set2[1]) empty = false
+	if (this.sets[0].type == rSet && set2[1]>set1[0]) empty = false
+	if (this.sets[1].type == rSet && set1[1]>set2[0]) empty = false
+	if (set2[0] <= set1[0] && set1[0] < set2[1])      empty = false
+	if (set1[0] <= set2[0] && set2[0] < set1[1])      empty = false
+
+	if (empty) {
+		alert("Intersection is empty")
+		return []
+	}
+
+	if (this.sets[0].type == lSet && this.sets[1].type == lSet) return this.get2LIntersectData(z)
+	if (this.sets[0].type == rSet && this.sets[1].type == rSet) return this.get2RIntersectData(z)
+
+
+	let llimit
+	let rlimit
+	let data = []
+
+	if (this.sets[0].type == lSet) llimit = set2[0]
+	else if (this.sets[1].type == lSet) llimit = set1[0]
+	else llimit = Math.max(set1[0], set2[0])
+
+	if (this.sets[0].type == rSet) rlimit = set2[1]
+	else if (this.sets[1].type == rSet) rlimit = set1[1]
+	else rlimit = Math.min(set1[1], set2[1])
+
+	console.log(llimit, rlimit)
+
+	data.push(llimit, 0.0, z)
+	for (i = 1; i < fillLimit; i++) {
+		let x = llimit + (rlimit-llimit)*i/fillLimit
+		let y = Math.min(this.sets[0].muFunction(x), this.sets[1].muFunction(x))
+		data.push(x, y, z, x, 0.0, z)
+	}
+	data.push(rlimit, 0.0, z)
+
+	return data
+}
+
+GLViewport.prototype.getUnionData = function(z) {
+	return []
 }
 
 GLViewport.prototype.getInvertData = function(z) {
@@ -211,7 +305,8 @@ GLViewport.prototype.getInvertData = function(z) {
 GLViewport.prototype.getOperationData = function(z) {
 	if (this.operation < intersect) return this.alphaOperationData(z)
 	if (this.operation == invert) return this.getInvertData(z)
-	return this.setOperationData(z)
+	if (this.operation == intersect) return this.getIntersectData(z)
+	if (this.operation == union) return this.getUnionData(z)
 }
 
 GLViewport.prototype.addSet = function(set) {
@@ -256,6 +351,8 @@ GLViewport.prototype.setViewport = function() {
 	let set1 = [this.sets[0].alphaCut(0, 0), this.sets[0].alphaCut(0, 1)]
 	let set2 = [this.sets[1].alphaCut(0, 0), this.sets[1].alphaCut(0, 1)]
 
+	console.log("SET: ", set1)
+
 	let larr = [set1[0]]
 	let rarr = [set1[1]]
 
@@ -282,6 +379,19 @@ GLViewport.prototype.setViewport = function() {
 	this.center = (this.right+this.left)/2
 	document.getElementById("bottom-left").innerHTML = this.left
 	document.getElementById("bottom-right").innerHTML = this.right
+}
+
+GLViewport.prototype.drawSet = function(i) {
+	let data = this.sets[i].getData(-2.0)
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
+
+	identity()
+	zRotate(-90)
+	translate([-this.center, -0.5, 0])
+
+	useMatrix()
+	gl.uniform3f(uColor,1*(1-i),1*i,0)
+	gl.drawArrays(gl.LINE_STRIP,0,data.length/3)
 }
 
 GLViewport.prototype.draw = function() {
@@ -336,33 +446,15 @@ GLViewport.prototype.draw = function() {
 	}
 
 	// първо множество
-	let data = this.sets[0].getData(-2.0)
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
-
-	identity()
-	zRotate(-90)
-	translate([-this.center, -0.5, 0])
-
-	useMatrix()
-	gl.uniform3f(uColor,1,0,0)
-	gl.drawArrays(gl.LINE_STRIP,0,data.length/3)
+	this.drawSet(0)
 
 	// второ множество
-	if (this.operation != invert) {
-		data = this.sets[1].getData(-1.0)
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
-	
-		identity()
-		zRotate(-90)
-		translate([-this.center, -0.5, 0])
-	
-		useMatrix()
-		gl.uniform3f(uColor,0,1,0)
-		gl.drawArrays(gl.LINE_STRIP,0,data.length/3)
-	}
+	if (this.operation != invert) this.drawSet(1)
+
+	gl.uniform3f(uColor,0,0,1)
 
 	//операция
-	data = this.getOperationData(0.0)
+	data = this.getOperationData(-5.0)
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
 
 	identity()
@@ -370,7 +462,7 @@ GLViewport.prototype.draw = function() {
 	translate([-this.center, -0.5, 0])
 
 	useMatrix()
-	gl.uniform3f(uColor,0,0,1)
+	if (this.operation == intersect || this.operation == union) gl.drawArrays(gl.TRIANGLE_STRIP,0,data.length/3)
 	gl.drawArrays(gl.LINE_STRIP,0,data.length/3)
 }
 
