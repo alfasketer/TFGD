@@ -193,55 +193,6 @@ GLViewport.prototype.alphaOperationData = function(z) {
 	return data
 }
 
-GLViewport.prototype.get2LIntersectData = function(z) {
-	let left = [Math.min(this.sets[0].points[0], this.sets[1].points[0]), Math.max(this.sets[0].points[0], this.sets[1].points[0])]
-	let right = [Math.min(this.sets[0].points[1], this.sets[1].points[1]), Math.max(this.sets[0].points[1], this.sets[1].points[1])]
-	let complex = false
-
-	if(this.sets[0].points[0] > this.sets[1].points[0] && this.sets[0].points[1] < this.sets[1].points[1]) complex = true
-	if(this.sets[1].points[0] > this.sets[0].points[0] && this.sets[1].points[1] < this.sets[0].points[1]) complex = true
-
-	let data = [
-		-999.00, 1.0, z,
-		-999.00, 0.0, z,
-		left[0], 1.0, z,
-		left[0], 0.0, z
-	]
-
-	if (complex) {
-		let k = (right[1]-right[0])/(right[1]-right[0]+left[1]-left[0])
-		let newx = right[1] - k * (right[1]-left[0])
-		data.push(newx, k, z, newx, 0.0, z)
-	}
-
-	data.push(right[0], 0.0, z)
-	return data
-}
-
-GLViewport.prototype.get2RIntersectData = function(z) {
-	let left = [Math.min(this.sets[0].points[0], this.sets[1].points[0]), Math.max(this.sets[0].points[0], this.sets[1].points[0])]
-	let right = [Math.min(this.sets[0].points[1], this.sets[1].points[1]), Math.max(this.sets[0].points[1], this.sets[1].points[1])]
-	let complex = false
-
-	if(this.sets[0].points[0] > this.sets[1].points[0] && this.sets[0].points[1] < this.sets[1].points[1]) complex = true
-	if(this.sets[1].points[0] > this.sets[0].points[0] && this.sets[1].points[1] < this.sets[0].points[1]) complex = true
-
-	let data = [
-		left[1], 0.0, z
-	]
-
-	if (complex) {
-		let k = (right[1]-right[0])/(right[1]-right[0]+left[1]-left[0])
-		let newx = right[1] - k * (right[1]-left[0])
-		data.push(newx, k, z, newx, 0.0, z)
-	}
-
-	data.push(right[1], 1.0, z)
-	data.push(right[1], 0.0, z)
-	data.push(999.0, 1.0, z)
-	data.push(999.0, 0.0, z)
-	return data
-}
 
 GLViewport.prototype.getIntersectData = function(z) {
 	let set1 = [this.sets[0].alphaCut(0, 0), this.sets[0].alphaCut(0, 1)]
@@ -261,31 +212,33 @@ GLViewport.prototype.getIntersectData = function(z) {
 		return []
 	}
 
-	if (this.sets[0].type == lSet && this.sets[1].type == lSet) return this.get2LIntersectData(z)
-	if (this.sets[0].type == rSet && this.sets[1].type == rSet) return this.get2RIntersectData(z)
-
-
 	let llimit
 	let rlimit
 	let data = []
 
-	if (this.sets[0].type == lSet) llimit = set2[0]
+	if (this.sets[0].type == lSet && this.sets[1].type == lSet) llimit = Math.min(set1[0], set2[0])
+	else if (this.sets[0].type == lSet) llimit = set2[0]
 	else if (this.sets[1].type == lSet) llimit = set1[0]
 	else llimit = Math.max(set1[0], set2[0])
 
-	if (this.sets[0].type == rSet) rlimit = set2[1]
+	if (this.sets[0].type == rSet && this.sets[1].type == rSet) rlimit = Math.max(set1[0], set2[0])
+	else if (this.sets[0].type == rSet) rlimit = set2[1]
 	else if (this.sets[1].type == rSet) rlimit = set1[1]
 	else rlimit = Math.min(set1[1], set2[1])
 
 	console.log(llimit, rlimit)
 
+	if (this.sets[0].type == lSet && this.sets[1].type == lSet)
+		data.push(-999.0, 1.0, z, -999, 0.0, z, llimit, 1.0, z)
 	data.push(llimit, 0.0, z)
 	for (i = 1; i < fillLimit; i++) {
 		let x = llimit + (rlimit-llimit)*i/fillLimit
 		let y = Math.min(this.sets[0].muFunction(x), this.sets[1].muFunction(x))
 		data.push(x, y, z, x, 0.0, z)
 	}
-	data.push(rlimit, 0.0, z)
+	if (this.sets[0].type == rSet && this.sets[1].type == rSet)
+		data.push(rlimit, 1.0, z, rlimit, 0.0, z, 999.0, 1.0, z, 999.0, 0.0, z)
+	else data.push(rlimit, 0.0, z)
 
 	return data
 }
