@@ -29,8 +29,16 @@
 <body>
 	<div id="inputs">
 		<h1>Fuzzy Number Calculator</h1>
+		
+		<label for="Type">Choose an type of operations:</label>
+		<select name="Type" id="type" onchange="changeTypeSelect()">
+			<option value=0>α-cut Operations</option>
+			<option value=2>Extension Operations</option>
+			<option value=1>t-norms Operations</option>
+		</select>
+		<br><br>
 		<label for="Operations">Choose an operations:</label>
-		<select name="Operations" id="op" onchange="changeOpSelect(1)">
+		<select name="Operations" id="op" onchange="changeOpSelect()">
 			<option value=0>α-cut Sum</option>
 			<option value=1>α-cut Subtraction</option>
 			<option value=5>α-cut Aproximated Multiplication</option>
@@ -39,10 +47,14 @@
 			<option value=3>α-cut Continuous Division(A/B)</option>
 			<option value=7>α-cut Aproximated Division(B/A)</option>
 			<option value=4>α-cut Continuous Division(B/A)</option>
-			<option value=81>Intersection</option>
-			<option value=82>Union</option>
-			<option value=83>Inverse</option>
 		</select>
+
+		<div id="paramBlock">
+			<br>
+			<a>Operation Parameter (must be >0)</a>
+			<input name="OpParam" type="number" id="opParam" value=1>
+			<br>
+		</div>
 
 		<div id="sets">
 			<div class="fuzzyset">

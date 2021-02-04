@@ -13,9 +13,19 @@ const simplemul = 5
 const simplediv = 6
 const simplrdiv = 7
 
-const intersect = 81
-const union     = 82
-const invert    = 83
+const intersect = 70
+const iYeger    = 71
+const iProduct  = 72
+const iBProduct = 73
+const iHamacher = 74
+
+const union     = 80
+const uYeger    = 81
+const uProbSum  = 82
+const uBSum     = 83
+const uHamacher = 84
+
+const invert    = 99
 
 const glPadding = 0.5
 const gausLimit = 160
@@ -39,6 +49,7 @@ class GLViewport {
 		this.len = 0
 		this.sets = []
 		this.operation = sum
+		this.opParam = 1
 	}
 }
 
@@ -193,6 +204,19 @@ GLViewport.prototype.alphaOperationData = function(z) {
 	return data
 }
 
+GLViewport.prototype.getTNorms = function(a, b) {
+	if (this.operation == intersect) return Math.min(a, b)
+	if (this.operation == iYeger) {
+		let temp = Math.pow(1-a, this.opParam) + Math.pow(1-b, this.opParam)
+		return 1 - Math.min(1, Math.pow(temp, 1/this.opParam))
+	}
+	if (this.operation == iProduct) return a*b
+	if (this.operation == iBProduct) return Math.max(0, a+b-1)
+	if (this.operation == iHamacher) {
+		let temp = this.opParam + (1-this.opParam)*(a+b-a*b)
+		return a*b/temp
+	}
+}
 
 GLViewport.prototype.getIntersectData = function(z) {
 	let set1 = [this.sets[0].alphaCut(0, 0), this.sets[0].alphaCut(0, 1)]
@@ -233,7 +257,7 @@ GLViewport.prototype.getIntersectData = function(z) {
 	data.push(llimit, 0.0, z)
 	for (i = 1; i < fillLimit; i++) {
 		let x = llimit + (rlimit-llimit)*i/fillLimit
-		let y = Math.min(this.sets[0].muFunction(x), this.sets[1].muFunction(x))
+		let y = this.getTNorms(this.sets[0].muFunction(x), this.sets[1].muFunction(x))
 		data.push(x, y, z, x, 0.0, z)
 	}
 	if (this.sets[0].type == rSet && this.sets[1].type == rSet)
@@ -241,6 +265,21 @@ GLViewport.prototype.getIntersectData = function(z) {
 	else data.push(rlimit, 0.0, z)
 
 	return data
+}
+
+GLViewport.prototype.getTConorms = function(a, b) {
+	if (this.operation == union) return Math.max(a, b)
+	if (this.operation == uYeger) {
+		let temp = Math.pow(a, this.opParam) + Math.pow(b, this.opParam)
+		return Math.min(1, Math.pow(temp, 1/this.opParam))
+	}
+	if (this.operation == uProbSum) return a + b - a*b
+	if (this.operation == uBSum) return Math.min(1, a+b)
+	if (this.operation == uHamacher) {
+		let temp1 = a + b - (2 - this.opParam)*a*b
+		let temp2 = 1 - (1 - this.opParam)*a*b
+		return temp1/temp2
+	}
 }
 
 GLViewport.prototype.getUnionData = function(z) {
@@ -262,7 +301,7 @@ GLViewport.prototype.getUnionData = function(z) {
 	data.push(llimit, 0.0, z)
 	for (i = 1; i < fillLimit; i++) {
 		let x = llimit + (rlimit-llimit)*i/fillLimit
-		let y = Math.max(this.sets[0].muFunction(x), this.sets[1].muFunction(x))
+		let y = this.getTConorms(this.sets[0].muFunction(x), this.sets[1].muFunction(x))
 		data.push(x, y, z, x, 0.0, z)
 	}
 
@@ -283,9 +322,9 @@ GLViewport.prototype.getInvertData = function(z) {
 
 GLViewport.prototype.getOperationData = function(z) {
 	if (this.operation < intersect) return this.alphaOperationData(z)
+	if (this.operation < union) return this.getIntersectData(z)
+	if (this.operation < invert) return this.getUnionData(z)
 	if (this.operation == invert) return this.getInvertData(z)
-	if (this.operation == intersect) return this.getIntersectData(z)
-	if (this.operation == union) return this.getUnionData(z)
 }
 
 GLViewport.prototype.addSet = function(set) {
@@ -478,7 +517,62 @@ function changeOpSelect() {
 	let val = parseInt(document.getElementById("op").value)
 	if (val==invert) document.getElementById("fset2").style.display = "none"
 	else document.getElementById("fset2").style.display = "block"
-	if (val < 80 && lrAllowed) {
+
+	if (val == iYeger || val == iHamacher || val == uYeger || val == uHamacher)
+		document.getElementById("paramBlock").style.display = "block"
+	else document.getElementById("paramBlock").style.display = "none"
+}
+
+
+function changeTypeSelect() {
+	let operations = []
+
+	operations[0] = [
+		["α-cut Sum", 0],
+		["α-cut Subtraction", 1],
+		["α-cut Aproximated Multiplication",5],
+		["α-cut Continuous Multiplication",2],
+		["α-cut Aproximated Division(A/B)",6],
+		["α-cut Continuous Division(A/B)",3],
+		["α-cut Aproximated Division(B/A)",7],
+		["α-cut Continuous Division(B/A)",4]
+	]
+
+	operations[1] = [
+		["Intersect (min)", 70],
+		["Intersect (Yeger)", 71],
+		["Intersect (Product)", 72],
+		["Intersect (Bounded Product)", 73],
+		["Intersect (Hamacher)", 74],
+		
+		["Union (max)", 80],
+		["Union (Yeger)", 81],
+		["Union (Probalistic Sum)", 82],
+		["Union (Bounded Sum)", 83],
+		["Union (Hamacher)", 84],
+		
+		["Inversion", 99],
+	]
+
+	operations[2] = []
+
+	let val = parseInt(document.getElementById("type").value)
+	let field = document.getElementById("op")
+	let currlen = operations[currType].length
+	for (i = 0; i < currlen; i++)
+		field.remove(0);	
+
+	currType = val
+	currlen = operations[currType].length
+
+	for (i = 0; i < currlen; i++) {
+		option = document.createElement("option");
+		option.text = operations[currType][i][0];
+		option.value = String(operations[currType][i][1])
+		field.add(option);
+	}
+
+	if (val != 1 && lrAllowed) {
 		document.getElementById("set1").remove(3);
 		document.getElementById("set1").remove(3);
 		document.getElementById("set2").remove(3);
@@ -487,7 +581,7 @@ function changeOpSelect() {
 		changeSetSelect(2)
 		lrAllowed = false
 	}
-	else if (val >= 80 && !lrAllowed) {	
+	else if (val == 1 && !lrAllowed) {	
 		let field
 		let option
 
@@ -507,15 +601,18 @@ function changeOpSelect() {
 
 		lrAllowed = true
 	}
+
+	changeOpSelect()
 }
 
 function checkValues(arr, setType) {
 	var check = true
 	console.log(arr, setType)
-	if (setType<2) {
+	let lens = [3, 4, 0, 2, 2]
+	if (setType!=2) {
 		//Check if every consecutive value is larger than the last
 		curr = arr[0]
-		for(i = 1; i < 3+setType; i++) {
+		for(i = 1; i < lens[setType]; i++) {
 			if(arr[i]<curr) {
 				check = false
 				break
@@ -534,7 +631,6 @@ function generate() {
 	let arr2 = []
 	let ret = false
 
-
 	for (i = 1; i<5; i++) {
 		arr1[i-1] = parseFloat(document.getElementById("input1" + i).value)
 		arr2[i-1] = parseFloat(document.getElementById("input2" + i).value)
@@ -542,6 +638,9 @@ function generate() {
 
 	let setType1 = parseInt(document.getElementById("set1").value)
 	let setType2 = parseInt(document.getElementById("set2").value)
+
+	vptest.operation = parseInt(document.getElementById("op").value)
+	vptest.opParam = parseFloat(document.getElementById("opParam").value)
 
 	if (checkValues(arr1, setType1) == false) {
 		alert("Invalid values for set 1!")
@@ -553,16 +652,21 @@ function generate() {
 		ret = true
 	}
 
-	if (ret) return
+	if ((vptest.operation == iYeger || vptest.operation == iHamacher || vptest.operation == uYeger || vptest.operation == uHamacher) && vptest.opParam <= 0) {
+		alert("Invalid parameter!")
+		ret = true
+	}
 
+	if (ret) return
+	
 	vptest.clearSets()
 	vptest.sets[0] = new FuzzyNum (setType1, arr1)
 	vptest.sets[1] = new FuzzyNum (setType2, arr2)
-	vptest.operation = parseInt(document.getElementById("op").value)
 	vptest.draw()
 	document.getElementById("canvas-container").style.display = "flex"
 }
 
+currType = 0
 lrAllowed = false
 vptest = new GLViewport()
 

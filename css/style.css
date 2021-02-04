@@ -54,6 +54,10 @@ tr {
 	display: flex;
 }
 
+#paramBlock {
+	display: none;
+}
+
 .fuzzyset {
 	margin: 20px
 }
