@@ -424,13 +424,7 @@ GLViewport.prototype.draw = function() {
 		gl.drawArrays(gl.LINES,0,2)
 	}
 
-	// първо множество
-	this.drawSet(0)
-
-	// второ множество
-	if (this.operation != invert) this.drawSet(1)
-
-	gl.uniform3f(uColor,0,0,1)
+	gl.uniform3f(uColor,0.5,0.5,1)
 
 	//операция
 	data = this.getOperationData(-5.0)
@@ -443,6 +437,12 @@ GLViewport.prototype.draw = function() {
 	useMatrix()
 	if (this.operation == intersect || this.operation == union) gl.drawArrays(gl.TRIANGLE_STRIP,0,data.length/3)
 	gl.drawArrays(gl.LINE_STRIP,0,data.length/3)
+
+	// първо множество
+	this.drawSet(0)
+
+	// второ множество
+	if (this.operation != invert) this.drawSet(1)
 }
 
 function changeSetSelect(i) {
