@@ -36,7 +36,7 @@ tr {
 }
 
 #canvas-container {
-	display: none;
+	display: flex;
 	overflow-x: auto;
 }
 
@@ -70,7 +70,15 @@ tr {
 	color: #8080ff
 }
 
-h4 {
+#container {
+	width:fit-content
+}
+
+h1 {
+	margin-bottom: 0;
+}
+
+h3, h4 {
 	margin-block-start: 0;
     margin-block-end: 0;
 }

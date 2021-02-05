@@ -27,92 +27,101 @@
 </head>
 
 <body>
-	<div id="inputs">
-		<h1>Touch Fuzzy Get Dizzy</h1>
-		<h3>A Fuzzy Number Calculator</h3>
-		
-		<label for="Type">Choose an type of operations:</label>
-		<select name="Type" id="type" onchange="changeTypeSelect()">
-			<option value=3>Simple α-cut Operations (α=0,1)</option>
-			<option value=0>Complex α-cut Operations (α∈[0,1])</option>
-			<option value=2>Extension Operations</option>
-			<option value=1>t-norms & t-conorm Operations</option>
-		</select>
-		<br><br>
-		<label for="Operations">Choose an operations:</label>
-		<select name="Operations" id="op" onchange="changeOpSelect()">
-			<option value=0>Sum</option>
-			<option value=1>Subtraction</option>
-			<option value=2>Multiplication</option>
-			<option value=3>Division(A/B)</option>
-			<option value=4>Division(B/A)</option>
-		</select>
+	<div id="container">
+		<div id="inputs">
+			<h1>Touch Fuzzy Get Dizzy</h1>
+			<h3>A Fuzzy Number Calculator</h3>
+			<p>Developed by Georgi Atanasov, FN 62189<br>
+				Github page: <a href="https://github.com/alfasketer/tfgd">https://github.com/alfasketer/tfgd</a></p>
 
-		<div id="paramBlock">
-			<br>
-			<a>Operation Parameter (must be >0)</a>
-			<input name="OpParam" type="number" id="opParam" value=1>
-			<br>
-		</div>
+			<hr>
 
-		<div id="sets">
-			<div class="fuzzyset">
-				<label for="Set1">Fuzzy Set A:</label>
-				<select name="Set1" id="set1" onchange="changeSetSelect(1)">
-					<option value="0">Triangular</option>
-					<option value="1" selected = "selected">Trapezoid</option>
-					<option value="2">Gaussian</option>
-				</select>
-				<br><br>
-				<img src="css/img/Trap.png" id="Formula1">
-				<table>
-					<tr id="row11"><td>a</td><td><input type="number" id="input11" value=1></td></tr>
-					<tr id="row12"><td>b</td><td><input type="number" id="input12" value=2></td></tr>
-					<tr id="row13"><td>c</td><td><input type="number" id="input13" value=3></td></tr>
-					<tr id="row14"><td>d</td><td><input type="number" id="input14" value=4></td></tr>
-				</table>
+			<label for="Type">Choose an type of operations:</label>
+			<select name="Type" id="type" onchange="changeTypeSelect()">
+				<option value=3>Simple α-cut Operations (α=0,1)</option>
+				<option value=0>Complex α-cut Operations (α∈[0,1])</option>
+				<option value=2>Extension Operations</option>
+				<option value=1>t-norms & t-conorm Operations</option>
+			</select>
+			<br><br>
+			<label for="Operations">Choose an operations:</label>
+			<select name="Operations" id="op" onchange="changeOpSelect()">
+				<option value=0>Sum</option>
+				<option value=1>Subtraction</option>
+				<option value=2>Multiplication</option>
+				<option value=3>Division(A/B)</option>
+				<option value=4>Division(B/A)</option>
+			</select>
+
+			<div id="paramBlock">
+				<br>
+				<a>Operation Parameter (must be >0)</a>
+				<input name="OpParam" type="number" id="opParam" value=1>
+				<br>
 			</div>
 
-			<div class="fuzzyset" id="fset2">
-				<label for="Set2">Fuzzy Set B:</label>
-				<select name="Set2" id="set2" onchange="changeSetSelect(2)">
-					<option value="0">Triangular</option>
-					<option value="1" selected = "selected">Trapezoid</option>
-					<option value="2">Gaussian</option>
-				</select>
-				<br><br>
-				<img src="css/img/Trap.png" id="Formula2">
-				<table>
-					<tr id="row21"><td>a</td><td><input type="number" id="input21" value=1></td></tr>
-					<tr id="row22"><td>b</td><td><input type="number" id="input22" value=2></td></tr>
-					<tr id="row23"><td>c</td><td><input type="number" id="input23" value=3></td></tr>
-					<tr id="row24"><td>d</td><td><input type="number" id="input24" value=4></td></tr>
-				</table>
+			<div id="sets">
+				<div class="fuzzyset">
+					<label for="Set1">Fuzzy Set A:</label>
+					<select name="Set1" id="set1" onchange="changeSetSelect(1)">
+						<option value="0">Triangular</option>
+						<option value="1" selected = "selected">Trapezoid</option>
+						<option value="2">Gaussian</option>
+					</select>
+					<br><br>
+					<img src="css/img/Trap.png" id="Formula1">
+					<table>
+						<tr id="row11"><td>a</td><td><input type="number" id="input11" value=1></td></tr>
+						<tr id="row12"><td>b</td><td><input type="number" id="input12" value=2></td></tr>
+						<tr id="row13"><td>c</td><td><input type="number" id="input13" value=3></td></tr>
+						<tr id="row14"><td>d</td><td><input type="number" id="input14" value=4></td></tr>
+					</table>
+				</div>
+
+				<div class="fuzzyset" id="fset2">
+					<label for="Set2">Fuzzy Set B:</label>
+					<select name="Set2" id="set2" onchange="changeSetSelect(2)">
+						<option value="0">Triangular</option>
+						<option value="1" selected = "selected">Trapezoid</option>
+						<option value="2">Gaussian</option>
+					</select>
+					<br><br>
+					<img src="css/img/Trap.png" id="Formula2">
+					<table>
+						<tr id="row21"><td>a</td><td><input type="number" id="input21" value=1></td></tr>
+						<tr id="row22"><td>b</td><td><input type="number" id="input22" value=2></td></tr>
+						<tr id="row23"><td>c</td><td><input type="number" id="input23" value=3></td></tr>
+						<tr id="row24"><td>d</td><td><input type="number" id="input24" value=4></td></tr>
+					</table>
+				</div>
 			</div>
+
+			<button onclick="generate()">Generate!</button>
 		</div>
+
+		<hr>
 
 		<h4>Legend:</h4>
 		<h4 id="RedText">Red - Fuzzy Set A</h4>
 		<h4 id="GreenText">Green - Fuzzy Set B</h4>
 		<h4 id="BlueText">Blue - Operation Result</h4>
-		<button onclick="generate()">Generate!</button>
-	</div>
-    <div id="canvas-container">
-		<table>
-			<tr class="side"><th>1.0</th></tr>
-			<tr class="side"><th>0.8</th></tr>
-			<tr class="side"><th>0.6</th></tr>
-			<tr class="side"><th>0.4</th></tr>
-			<tr class="side"><th>0.2</th></tr>
-			<tr class="side"><th>0.0</th></tr>
-		</table>
-		<div>
-			<canvas id="gl-canvas" width="1200" height="176"></canvas>
-			<div id="bottom-table">
-				<p id="bottom-left">a</p>
-				<p id="bottom-right">b</p>
+		<div id="canvas-container">
+			<table>
+				<tr class="side"><th>1.0</th></tr>
+				<tr class="side"><th>0.8</th></tr>
+				<tr class="side"><th>0.6</th></tr>
+				<tr class="side"><th>0.4</th></tr>
+				<tr class="side"><th>0.2</th></tr>
+				<tr class="side"><th>0.0</th></tr>
 			</table>
+			<div>
+				<canvas id="gl-canvas" width="1200" height="176"></canvas>
+				<div id="bottom-table">
+					<p id="bottom-left">0</p>
+					<p id="bottom-right">0</p>
+				</table>
+			</div>
 		</div>
-    </div>
+	</div>
 	<script src="js/main.js"></script>
 </body>
