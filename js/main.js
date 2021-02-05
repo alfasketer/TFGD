@@ -542,38 +542,38 @@ function changeTypeSelect() {
 	let operations = []
 
 	operations[0] = [
-		["Sum", 0],
-		["Subtraction", 1],
-		["Aproximated Multiplication",5],
-		["Continuous Multiplication",2],
-		["Aproximated Division(A/B)",6],
-		["Continuous Division(A/B)",3],
-		["Aproximated Division(B/A)",7],
-		["Continuous Division(B/A)",4]
+		["Sum", aSum],
+		["Subtraction", aSubtract],
+		["Aproximated Multiplication", aEzMul],
+		["Continuous Multiplication", aMultiply],
+		["Aproximated Division(A/B)", aEzDiv],
+		["Continuous Division(A/B)", aDivide],
+		["Aproximated Division(B/A)", aEzRDiv],
+		["Continuous Division(B/A)", aRDivide]
 	]
 
 	operations[1] = [
-		["Intersect (min)", 70],
-		["Intersect (Yeger)", 71],
-		["Intersect (Product)", 72],
-		["Intersect (Bounded Product)", 73],
-		["Intersect (Hamacher)", 74],
+		["Intersect (min)", intersect],
+		["Intersect (Yeger)", iYeger],
+		["Intersect (Product)", iProduct],
+		["Intersect (Bounded Product)", iBProduct],
+		["Intersect (Hamacher)", iHamacher],
 		
-		["Union (max)", 80],
-		["Union (Yeger)", 81],
-		["Union (Probalistic Sum)", 82],
-		["Union (Bounded Sum)", 83],
-		["Union (Hamacher)", 84],
+		["Union (max)", union],
+		["Union (Yeger)", uYeger],
+		["Union (Probalistic Sum)", uProbSum],
+		["Union (Bounded Sum)", uBSum],
+		["Union (Hamacher)", uHamacher],
 		
-		["Inversion", 99],
+		["Inversion", invert],
 	]
 
 	operations[2] = [
-		["Sum", 20],
-		["Subtraction", 21],
-		["Multiplication", 22],
-		["Division(A/B)", 23],
-		["Division(B/A)", 24]
+		["Sum", eSum],
+		["Subtraction", eSubtract],
+		["Multiplication", eMultiply],
+		["Division(A/B)", eDivide],
+		["Division(B/A)", eRDivide]
 	]
 
 	let val = parseInt(document.getElementById("type").value)
@@ -689,4 +689,4 @@ function generate() {
 currType = 0
 lrAllowed = false
 vptest = new GLViewport()
-
+changeTypeSelect()
