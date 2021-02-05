@@ -58,6 +58,23 @@ tr {
 	display: none;
 }
 
+#RedText {
+	color: #f00;
+}
+
+#GreenText {
+	color: #0f0;
+}
+
+#BlueText {
+	color: #8080ff
+}
+
+h4 {
+	margin-block-start: 0;
+    margin-block-end: 0;
+}
+
 .fuzzyset {
 	margin: 20px
 }
