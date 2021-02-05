@@ -1,8 +1,8 @@
 const triSet    = 0 //triangular fuzzy set
 const trapSet   = 1 //trapezoid fuzzy set
 const gausSet   = 2 //gausian fuzzy set
-const lSet      = 98 //l-function fuzzy set
-const rSet      = 99 //r-function fuzzy set
+const lSet      = 3 //l-function fuzzy set
+const rSet      = 4 //r-function fuzzy set
 
 const aSum      = 0
 const aSubtract = 1
@@ -246,29 +246,11 @@ GLViewport.prototype.getIntersectData = function(z) {
 	let rlimit
 	let data = []
 
-	if (this.sets[0].type == lSet && this.sets[1].type == lSet) llimit = Math.min(set1[0], set2[0])
-	else if (this.sets[0].type == lSet) llimit = set2[0]
-	else if (this.sets[1].type == lSet) llimit = set1[0]
-	else llimit = Math.max(set1[0], set2[0])
-
-	if (this.sets[0].type == rSet && this.sets[1].type == rSet) rlimit = Math.max(set1[0], set2[0])
-	else if (this.sets[0].type == rSet) rlimit = set2[1]
-	else if (this.sets[1].type == rSet) rlimit = set1[1]
-	else rlimit = Math.min(set1[1], set2[1])
-
-	console.log(llimit, rlimit)
-
-	if (this.sets[0].type == lSet && this.sets[1].type == lSet)
-		data.push(-999.0, 1.0, z, -999, 0.0, z, llimit, 1.0, z)
-	data.push(llimit, 0.0, z)
-	for (i = 1; i < fillLimit; i++) {
-		let x = llimit + (rlimit-llimit)*i/fillLimit
+	let step = (this.right-this.left)/fillLimit
+	for (x=this.left; x<=this.right; x+=step) {
 		let y = this.getTNorms(this.sets[0].muFunction(x), this.sets[1].muFunction(x))
 		data.push(x, y, z, x, 0.0, z)
 	}
-	if (this.sets[0].type == rSet && this.sets[1].type == rSet)
-		data.push(rlimit, 1.0, z, rlimit, 0.0, z, 999.0, 1.0, z, 999.0, 0.0, z)
-	else data.push(rlimit, 0.0, z)
 
 	return data
 }
@@ -301,19 +283,11 @@ GLViewport.prototype.getUnionData = function(z) {
 
 	console.log(llimit, rlimit)
 
-	if (this.sets[0].type == lSet || this.sets[1].type == lSet)
-		data.push(-999.0, 1.0, z, -999, 0.0, z, llimit, 1.0, z)
-
-	data.push(llimit, 0.0, z)
-	for (i = 1; i < fillLimit; i++) {
-		let x = llimit + (rlimit-llimit)*i/fillLimit
+	let step = (this.right-this.left)/fillLimit
+	for (x=this.left; x<=this.right; x+=step) {
 		let y = this.getTConorms(this.sets[0].muFunction(x), this.sets[1].muFunction(x))
 		data.push(x, y, z, x, 0.0, z)
 	}
-
-	if (this.sets[0].type == rSet || this.sets[1].type == rSet)
-		data.push(rlimit, 1.0, z, rlimit, 0.0, z, 999.0, 1.0, z, 999.0, 0.0, z)
-	else data.push(rlimit, 0.0, z)
 
 	return data
 }
@@ -623,7 +597,7 @@ function checkValues(arr, setType) {
 	let lens = [3, 4, 0, 2, 2]
 	if (setType!=2) {
 		//Check if every consecutive value is larger than the last
-		curr = arr[0]
+		let curr = arr[0]
 		for(i = 1; i < lens[setType]; i++) {
 			if(arr[i]<curr) {
 				check = false
