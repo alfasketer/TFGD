@@ -576,12 +576,12 @@ function changeTypeSelect() {
 		
 			option = document.createElement("option");
 			option.text = "L-Fuzzy Set";
-			option.value = "98"
+			option.value = String(lSet)
 			field.add(option);
 
 			option = document.createElement("option");
 			option.text = "R-Fuzzy Set";
-			option.value = "99"
+			option.value = String(rSet)
 			field.add(option);
 		}
 
