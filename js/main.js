@@ -9,9 +9,12 @@ const aSubtract = 1
 const aMultiply = 2
 const aDivide   = 3
 const aRDivide  = 4
-const aEzMul    = 5
-const aEzDiv    = 6
-const aEzRDiv   = 7
+
+const aEzSum    = 10
+const aEzSub    = 11
+const aEzMul    = 12
+const aEzDiv    = 13
+const aEzRDiv   = 14
 
 const eSum      = 20
 const eSubtract = 21
@@ -167,9 +170,9 @@ GLViewport.prototype.getApprData = function(value) {
 
 	for(i = 0; i < 2; i++) {
 		for(j = 0; j < 2; j++) {
-			if(this.operation==aSum)
+			if(this.operation==aSum || this.operation==aEzSum)
 				newarr.push(this.sets[0].alphaCut(value, i)+this.sets[1].alphaCut(value, j))
-			if(this.operation==aSubtract)
+			if(this.operation==aSubtract || this.operation==aEzSub)
 				newarr.push(this.sets[0].alphaCut(value, i)-this.sets[1].alphaCut(value, j))
 			if(this.operation==aMultiply || this.operation==aEzMul)
 				newarr.push(this.sets[0].alphaCut(value, i)*this.sets[1].alphaCut(value, j))
@@ -188,9 +191,9 @@ GLViewport.prototype.getThirdLimits = function(larr, rarr) {
 	for(i = 0; i < 2; i++)
 		for(j = 0; j < 2; j++)
 		{
-			if(this.operation==aSum || this.operation==eSum)
+			if(this.operation==aSum || this.operation==aEzSum || this.operation==eSum)
 				newarr.push(larr[i]+rarr[j])
-			if(this.operation==aSubtract || this.operation==eSubtract)
+			if(this.operation==aSubtract || this.operation==aEzSub || this.operation==eSubtract)
 				newarr.push(larr[i]-rarr[j])
 			if(this.operation==aMultiply || this.operation==aEzMul  || this.operation==eMultiply)
 				newarr.push(larr[i]*rarr[j])
@@ -211,7 +214,7 @@ GLViewport.prototype.alphaOperationData = function(z) {
 	let data = []
 	let i
 	let limit = gausLimit
-	if(this.operation>aRDivide) limit = 1
+	if(this.operation>=aEzSum) limit = 1
 	data.push(-999.00, 0.0, z)
 
 	console.log(this.getApprData(0.2, 0))
@@ -357,6 +360,7 @@ GLViewport.prototype.getInvertData = function(z) {
 }
 
 GLViewport.prototype.getOperationData = function(z) {
+	//if (this.operation < aEzSum) return this.alphaOperationData(z)
 	if (this.operation < eSum) return this.alphaOperationData(z)
 	if (this.operation < intersect) return this.extensionOperationData(z)
 	if (this.operation < union) return this.getIntersectData(z)
@@ -544,12 +548,17 @@ function changeTypeSelect() {
 	operations[0] = [
 		["Sum", aSum],
 		["Subtraction", aSubtract],
-		["Aproximated Multiplication", aEzMul],
-		["Continuous Multiplication", aMultiply],
-		["Aproximated Division(A/B)", aEzDiv],
-		["Continuous Division(A/B)", aDivide],
-		["Aproximated Division(B/A)", aEzRDiv],
-		["Continuous Division(B/A)", aRDivide]
+		["Multiplication", aMultiply],
+		["Division(A/B)", aDivide],
+		["Division(B/A)", aRDivide]
+	]
+
+	operations[3] = [
+		["Sum", aEzSum],
+		["Subtraction", aEzSub],
+		["Multiplication", aEzMul],
+		["Division(A/B)", aEzDiv],
+		["Division(B/A)", aEzRDiv]
 	]
 
 	operations[1] = [
