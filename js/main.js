@@ -6,12 +6,18 @@ const rSet      = 99 //r-function fuzzy set
 
 const aSum      = 0
 const aSubtract = 1
-const aMultiply  = 2
-const aDivide    = 3
-const aRDivide = 4
-const aEzMul = 5
-const aEzDiv = 6
-const aEzRDiv = 7
+const aMultiply = 2
+const aDivide   = 3
+const aRDivide  = 4
+const aEzMul    = 5
+const aEzDiv    = 6
+const aEzRDiv   = 7
+
+const eSum      = 20
+const eSubtract = 21
+const eMultiply = 22
+const eDivide   = 23
+const eRDivide  = 24
 
 const intersect = 70
 const iYeger    = 71
@@ -554,7 +560,13 @@ function changeTypeSelect() {
 		["Inversion", 99],
 	]
 
-	operations[2] = []
+	operations[2] = [
+		["Sum", 20],
+		["Subtraction", 21],
+		["Multiplication", 22],
+		["Division(A/B)", 23],
+		["Division(B/A)", 24]
+	]
 
 	let val = parseInt(document.getElementById("type").value)
 	let field = document.getElementById("op")
