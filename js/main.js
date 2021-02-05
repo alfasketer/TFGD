@@ -4,14 +4,14 @@ const gausSet   = 2 //gausian fuzzy set
 const lSet      = 98 //l-function fuzzy set
 const rSet      = 99 //r-function fuzzy set
 
-const sum       = 0
-const subtract  = 1
-const multiply  = 2
-const divide    = 3
-const revdivide = 4
-const simplemul = 5
-const simplediv = 6
-const simplrdiv = 7
+const aSum      = 0
+const aSubtract = 1
+const aMultiply  = 2
+const aDivide    = 3
+const aRDivide = 4
+const aEzMul = 5
+const aEzDiv = 6
+const aEzRDiv = 7
 
 const intersect = 70
 const iYeger    = 71
@@ -48,7 +48,7 @@ class GLViewport {
 		this.center = 0
 		this.len = 0
 		this.sets = []
-		this.operation = sum
+		this.operation = aSum
 		this.opParam = 1
 	}
 }
@@ -161,15 +161,15 @@ GLViewport.prototype.getApprData = function(value) {
 
 	for(i = 0; i < 2; i++) {
 		for(j = 0; j < 2; j++) {
-			if(this.operation==sum)
+			if(this.operation==aSum)
 				newarr.push(this.sets[0].alphaCut(value, i)+this.sets[1].alphaCut(value, j))
-			if(this.operation==subtract)
+			if(this.operation==aSubtract)
 				newarr.push(this.sets[0].alphaCut(value, i)-this.sets[1].alphaCut(value, j))
-			if(this.operation==multiply || this.operation==simplemul)
+			if(this.operation==aMultiply || this.operation==aEzMul)
 				newarr.push(this.sets[0].alphaCut(value, i)*this.sets[1].alphaCut(value, j))
-			if(this.operation==divide || this.operation == simplediv)
+			if(this.operation==aDivide || this.operation == aEzDiv)
 				newarr.push(this.sets[0].alphaCut(value, i)/this.sets[1].alphaCut(value, j))
-			if(this.operation==revdivide || this.operation == simplrdiv)
+			if(this.operation==aRDivide || this.operation == aEzRDiv)
 				newarr.push(this.sets[1].alphaCut(value, i)/this.sets[0].alphaCut(value, j))
 		}
 	}
@@ -182,7 +182,7 @@ GLViewport.prototype.alphaOperationData = function(z) {
 	let data = []
 	let i
 	let limit = gausLimit
-	if(this.operation>divide) limit = 1
+	if(this.operation>aRDivide) limit = 1
 	data.push(-999.00, 0.0, z)
 
 	console.log(this.getApprData(0.2, 0))
@@ -347,15 +347,15 @@ GLViewport.prototype.getThirdCut = function(larr, rarr) {
 	for(i = 0; i < 2; i++)
 		for(j = 0; j < 2; j++)
 		{
-			if(this.operation==sum)
+			if(this.operation==aSum)
 				newarr.push(larr[i]+rarr[j])
-			if(this.operation==subtract)
+			if(this.operation==aSubtract)
 				newarr.push(larr[i]-rarr[j])
-			if(this.operation==multiply || this.operation==simplemul)
+			if(this.operation==aMultiply || this.operation==aEzMul)
 				newarr.push(larr[i]*rarr[j])
-			if(this.operation==divide || this.operation==simplediv)
+			if(this.operation==aDivide || this.operation==aEzDiv)
 				newarr.push(larr[i]/rarr[j])
-			if(this.operation == revdivide || this.operation == simplrdiv)
+			if(this.operation == aRDivide || this.operation == aEzRDiv)
 				newarr.push(rarr[j]/larr[i])
 		}
 	
@@ -528,14 +528,14 @@ function changeTypeSelect() {
 	let operations = []
 
 	operations[0] = [
-		["α-cut Sum", 0],
-		["α-cut Subtraction", 1],
-		["α-cut Aproximated Multiplication",5],
-		["α-cut Continuous Multiplication",2],
-		["α-cut Aproximated Division(A/B)",6],
-		["α-cut Continuous Division(A/B)",3],
-		["α-cut Aproximated Division(B/A)",7],
-		["α-cut Continuous Division(B/A)",4]
+		["Sum", 0],
+		["Subtraction", 1],
+		["Aproximated Multiplication",5],
+		["Continuous Multiplication",2],
+		["Aproximated Division(A/B)",6],
+		["Continuous Division(A/B)",3],
+		["Aproximated Division(B/A)",7],
+		["Continuous Division(B/A)",4]
 	]
 
 	operations[1] = [
