@@ -183,6 +183,29 @@ GLViewport.prototype.getApprData = function(value) {
 	return [Math.min.apply(Math, newarr), Math.max.apply(Math, newarr)]
 }
 
+GLViewport.prototype.getThirdLimits = function(larr, rarr) {
+	let newarr = []
+	for(i = 0; i < 2; i++)
+		for(j = 0; j < 2; j++)
+		{
+			if(this.operation==aSum || this.operation==eSum)
+				newarr.push(larr[i]+rarr[j])
+			if(this.operation==aSubtract || this.operation==eSubtract)
+				newarr.push(larr[i]-rarr[j])
+			if(this.operation==aMultiply || this.operation==aEzMul  || this.operation==eMultiply)
+				newarr.push(larr[i]*rarr[j])
+			if(this.operation==aDivide || this.operation==aEzDiv || this.operation==eDivide)
+				newarr.push(larr[i]/rarr[j])
+			if(this.operation == aRDivide || this.operation == aEzRDiv || this.operation==eRDivide)
+				newarr.push(rarr[j]/larr[i])
+		}
+	
+	let min = Math.min.apply(Math, newarr)
+	let max = Math.max.apply(Math, newarr)
+	console.log(larr, rarr, newarr)
+	return [min, max]
+}
+
 GLViewport.prototype.alphaOperationData = function(z) {
 	let points = []
 	let data = []
@@ -207,6 +230,39 @@ GLViewport.prototype.alphaOperationData = function(z) {
 		data.push(points[i][1], i/limit, z)
 	}
 	data.push(999.00, 0.0, z)
+	return data
+}
+
+GLViewport.prototype.getOppositeData = function(newx, x) {
+	if(this.operation == eSum)      return newx - x
+	if(this.operation == eSubtract) return x - newx
+	if(this.operation == eMultiply) return newx / x
+	if(this.operation == eDivide)   return x / newx
+	if(this.operation == eRDivide)  return x * newx
+}
+
+GLViewport.prototype.extensionOperationData = function(z) {
+	let set1 = [this.sets[0].alphaCut(0, 0), this.sets[0].alphaCut(0, 1)]
+	let set2 = [this.sets[1].alphaCut(0, 0), this.sets[1].alphaCut(0, 1)]
+	let limits = this.getThirdLimits(set1, set2)
+
+	let data = []
+	data.push(-999.0, 0.0, z, limits[0], 0.0, z)
+
+	for(i=1; i<fillLimit; i++) {
+		let newx = limits[0] + i/fillLimit*(limits[1]-limits[0])
+		let tempdata = []
+		for(j=0; j<=fillLimit; j++) {
+			let x1=set1[0] + j/fillLimit*(set1[1]-set1[0])
+			let x2=this.getOppositeData(newx, x1)
+			if (x2 < set2[0] || x2 > set2[1]) continue
+			tempdata.push(Math.min(this.sets[0].muFunction(x1), this.sets[1].muFunction(x2)))
+		}
+		data.push(newx, Math.max.apply(Math, tempdata), z)
+	}
+
+	data.push(limits[1], 0.0, z, 999.0, 0.0, z)
+
 	return data
 }
 
@@ -301,7 +357,8 @@ GLViewport.prototype.getInvertData = function(z) {
 }
 
 GLViewport.prototype.getOperationData = function(z) {
-	if (this.operation < intersect) return this.alphaOperationData(z)
+	if (this.operation < eSum) return this.alphaOperationData(z)
+	if (this.operation < intersect) return this.extensionOperationData(z)
 	if (this.operation < union) return this.getIntersectData(z)
 	if (this.operation < invert) return this.getUnionData(z)
 	if (this.operation == invert) return this.getInvertData(z)
@@ -322,29 +379,6 @@ GLViewport.prototype.setLimits = function(left, right) {
 	this.right = right + glPadding
 }
 
-GLViewport.prototype.getThirdCut = function(larr, rarr) {
-	let newarr = []
-	for(i = 0; i < 2; i++)
-		for(j = 0; j < 2; j++)
-		{
-			if(this.operation==aSum)
-				newarr.push(larr[i]+rarr[j])
-			if(this.operation==aSubtract)
-				newarr.push(larr[i]-rarr[j])
-			if(this.operation==aMultiply || this.operation==aEzMul)
-				newarr.push(larr[i]*rarr[j])
-			if(this.operation==aDivide || this.operation==aEzDiv)
-				newarr.push(larr[i]/rarr[j])
-			if(this.operation == aRDivide || this.operation == aEzRDiv)
-				newarr.push(rarr[j]/larr[i])
-		}
-	
-	let min = Math.min.apply(Math, newarr)
-	let max = Math.max.apply(Math, newarr)
-	console.log(larr, rarr, newarr)
-	return [min, max]
-}
-
 GLViewport.prototype.setViewport = function() {
 	let set1 = [this.sets[0].alphaCut(0, 0), this.sets[0].alphaCut(0, 1)]
 	let set2 = [this.sets[1].alphaCut(0, 0), this.sets[1].alphaCut(0, 1)]
@@ -360,7 +394,7 @@ GLViewport.prototype.setViewport = function() {
 	}
 
 	if(this.operation < intersect) {
-		let set3 = this.getThirdCut(set1, set2)
+		let set3 = this.getThirdLimits(set1, set2)
 		larr.push(set3[0])
 		rarr.push(set3[1])
 	}
