@@ -39,7 +39,7 @@ const invert    = 99
 const glPadding = 0.5
 const gausLimit = 160
 const fillLimit = 1200
-const eps       = 0.001
+const eps       = 0.01
 const cellSize  = 80
 
 class FuzzyNum {
@@ -251,13 +251,24 @@ GLViewport.prototype.extensionOperationData = function(z) {
 
 	for(i=1; i<fillLimit; i++) {
 		let newx = limits[0] + i/fillLimit*(limits[1]-limits[0])
-		let tempdata = []
-		for(j=0; j<=fillLimit; j++) {
-			let x1=set1[0] + j/fillLimit*(set1[1]-set1[0])
-			let x2=this.getOppositeData(newx, x1)
-			if (x2 < set2[0] || x2 > set2[1]) continue
-			tempdata.push(Math.min(this.sets[0].muFunction(x1), this.sets[1].muFunction(x2)))
-		}
+        let tempdata = []
+        if (Math.abs(newx) < eps && this.operation == eDivide) {
+            let x1 = 0
+            for(j=0; j<=fillLimit; j++) {
+                let x2=set2[0] + j/fillLimit*(set2[1]-set2[0])
+                tempdata.push(Math.min(this.sets[0].muFunction(x1), this.sets[1].muFunction(x2)))
+            }
+        }
+        else {
+            for(j=0; j<=fillLimit; j++) {
+                let x1=set1[0] + j/fillLimit*(set1[1]-set1[0])
+                let x2
+                if(Math.abs(newx) < eps && this.operation == eRDivide) x2 = 0
+                else x2=this.getOppositeData(newx, x1)
+                if (x2 < set2[0] || x2 > set2[1]) continue
+                tempdata.push(Math.min(this.sets[0].muFunction(x1), this.sets[1].muFunction(x2)))
+            }
+        }
 		data.push(newx, Math.max.apply(Math, tempdata), z)
 	}
 
