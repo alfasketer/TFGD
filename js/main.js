@@ -556,44 +556,53 @@ function changeTypeSelect() {
 	let operations = []
 
 	operations[0] = [
-		["Sum", aSum],
-		["Subtraction", aSub],
-		["Multiplication", aMul],
-		["Division(A/B)", aDiv],
-		["Division(B/A)", aRDiv]
-	]
-
-	operations[3] = [
-		["Sum", aEzSum],
-		["Subtraction", aEzSub],
-		["Multiplication", aEzMul],
-		["Division(A/B)", aEzDiv],
-		["Division(B/A)", aEzRDiv]
+		["Simple α-cut Sum", aEzSum],
+		["Complex α-cut Sum", aSum],
+		["Extension Sum", eSum],
 	]
 
 	operations[1] = [
-		["Intersect (min)", intersect],
-		["Intersect (Yeger)", iYeger],
-		["Intersect (Product)", iProduct],
-		["Intersect (Bounded Product)", iBProduct],
-		["Intersect (Hamacher)", iHamacher],
-		
-		["Union (max)", union],
-		["Union (Yeger)", uYeger],
-		["Union (Probalistic Sum)", uProbSum],
-		["Union (Bounded Sum)", uBSum],
-		["Union (Hamacher)", uHamacher],
-		
-		["Inversion", invert],
+		["Simple α-cut Subtraction", aEzSub],
+		["Complex α-cut Subtraction", aSub],
+		["Extension Subtraction", eSub],
 	]
 
 	operations[2] = [
-		["Sum", eSum],
-		["Subtraction", eSub],
-		["Multiplication", eMul],
-		["Division(A/B)", eDiv],
-		["Division(B/A)", eRDiv]
+		["Simple α-cut Multiplication", aEzMul],
+		["Complex α-cut Multiplication", aMul],
+		["Extension Multiplication", eMul],
 	]
+
+	operations[3] = [
+		["Simple α-cut Division(A/B)", aEzDiv],
+		["Complex α-cut Division(A/B)", aDiv],
+		["Extension Division(A/B)", eDiv],
+    ]
+	operations[4] = [
+		["Simple α-cut Division(B/A)", aEzRDiv],
+		["Complex α-cut Division(B/A)", aRDiv],
+		["Extension Division(B/A)", eRDiv],
+    ]
+
+	operations[5] = [
+		["Min Intersect", intersect],
+		["Yeger Intersect", iYeger],
+		["Product Intersect", iProduct],
+		["Bounded Product Intersect", iBProduct],
+		["Hamacher Intersect", iHamacher]
+    ]
+    
+    operations[6] = [
+		["Max Union", union],
+		["Yeger Union", uYeger],
+		["Probalistic Sum Union", uProbSum],
+		["Bounded Sum Union", uBSum],
+		["Hamacher Union", uHamacher]
+    ]
+
+    operations[7] = [
+		["Inversion", invert]
+    ]
 
 	let val = parseInt(document.getElementById("type").value)
 	let field = document.getElementById("op")
@@ -611,7 +620,7 @@ function changeTypeSelect() {
 		field.add(option);
 	}
 
-	if (val != 1 && lrAllowed) {
+	if (val < 5 && lrAllowed) {
 		document.getElementById("set1").remove(3);
 		document.getElementById("set1").remove(3);
 		document.getElementById("set2").remove(3);
@@ -620,7 +629,7 @@ function changeTypeSelect() {
 		changeSetSelect(2)
 		lrAllowed = false
 	}
-	else if (val == 1 && !lrAllowed) {	
+	else if (val >= 5 && !lrAllowed) {	
 		let field
 		let option
 

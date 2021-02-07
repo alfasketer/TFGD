@@ -36,21 +36,23 @@
 
 			<hr>
 
-			<label for="Type">Choose an type of operations:</label>
-			<select name="Type" id="type" onchange="changeTypeSelect()">
-				<option value=3>Simple α-cut Operations (α=0,1)</option>
-				<option value=0>Complex α-cut Operations (α∈[0,1])</option>
-				<option value=2>Extension Operations</option>
-				<option value=1>t-norms & t-conorm Operations</option>
-			</select>
-			<br><br>
-			<label for="Operations">Choose an operations:</label>
-			<select name="Operations" id="op" onchange="changeOpSelect()">
+			<label for="Type">Choose an operation:</label>
+            <select name="Type" id="type" onchange="changeTypeSelect()">
 				<option value=0>Sum</option>
 				<option value=1>Subtraction</option>
 				<option value=2>Multiplication</option>
 				<option value=3>Division(A/B)</option>
-				<option value=4>Division(B/A)</option>
+                <option value=4>Division(B/A)</option>
+				<option value=5>Intersection</option>
+				<option value=6>Union</option>
+                <option value=7>Inversion</option>
+			</select>
+			<br><br>
+			<label for="Operations">Choose a way to do the operation:</label>
+			<select name="Operations" id="op" onchange="changeOpSelect()">
+				<option value=0>Simple α-cut Operations (α=0,1)</option>
+				<option value=10>Complex α-cut Operations (α∈[0,1])</option>
+				<option value=20>Extension Operations</option>
 			</select>
 
 			<div id="paramBlock">
