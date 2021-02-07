@@ -205,7 +205,6 @@ GLViewport.prototype.getThirdLimits = function(larr, rarr) {
 	
 	let min = Math.min.apply(Math, newarr)
 	let max = Math.max.apply(Math, newarr)
-	console.log(larr, rarr, newarr)
 	return [min, max]
 }
 
@@ -216,8 +215,6 @@ GLViewport.prototype.alphaOperationData = function(z) {
 	let limit = gausLimit
 	if(this.operation>=aEzSum) limit = 1
 	data.push(-999.00, 0.0, z)
-
-	console.log(this.getApprData(0.2, 0))
 
 	i = 0
 	while (true) {
@@ -340,8 +337,6 @@ GLViewport.prototype.getUnionData = function(z) {
 	llimit = Math.min(set1[0], set2[0])
 	rlimit = Math.max(set1[1], set2[1])
 
-	console.log(llimit, rlimit)
-
 	let step = (this.right-this.left)/fillLimit
 	for (x=this.left; x<=this.right; x+=step) {
 		let y = this.getTConorms(this.sets[0].muFunction(x), this.sets[1].muFunction(x))
@@ -386,8 +381,6 @@ GLViewport.prototype.setLimits = function(left, right) {
 GLViewport.prototype.setViewport = function() {
 	let set1 = [this.sets[0].alphaCut(0, 0), this.sets[0].alphaCut(0, 1)]
 	let set2 = [this.sets[1].alphaCut(0, 0), this.sets[1].alphaCut(0, 1)]
-
-	console.log("SET: ", set1)
 
 	let larr = [set1[0]]
 	let rarr = [set1[1]]
@@ -636,7 +629,6 @@ function changeTypeSelect() {
 
 function checkValues(arr, setType) {
 	var check = true
-	console.log(arr, setType)
 	let lens = [3, 4, 0, 2, 2]
 	if (setType!=2) {
 		//Check if every consecutive value is larger than the last
