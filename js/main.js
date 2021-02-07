@@ -5,10 +5,10 @@ const lSet      = 3 //l-function fuzzy set
 const rSet      = 4 //r-function fuzzy set
 
 const aSum      = 0
-const aSubtract = 1
-const aMultiply = 2
-const aDivide   = 3
-const aRDivide  = 4
+const aSub      = 1
+const aMul      = 2
+const aDiv      = 3
+const aRDiv     = 4
 
 const aEzSum    = 10
 const aEzSub    = 11
@@ -17,10 +17,10 @@ const aEzDiv    = 13
 const aEzRDiv   = 14
 
 const eSum      = 20
-const eSubtract = 21
-const eMultiply = 22
-const eDivide   = 23
-const eRDivide  = 24
+const eSub      = 21
+const eMul      = 22
+const eDiv      = 23
+const eRDiv     = 24
 
 const intersect = 70
 const iYeger    = 71
@@ -85,6 +85,12 @@ FuzzyNum.prototype.alphaCut = function(alpha, side) {
 		else return this.points[0] + cut
 	}
 	else if (this.type == lSet || this.type == rSet) return this.points[side]
+}
+
+FuzzyNum.prototype.containsZero = function() {
+    let set = [this.alphaCut(0, 0), this.alphaCut(0, 1)]
+    if (set[0] < 0 && set[1] > 0) return true
+    return false
 }
 
 FuzzyNum.prototype.muFunction = function(x) {
@@ -172,13 +178,13 @@ GLViewport.prototype.getApprData = function(value) {
 		for(j = 0; j < 2; j++) {
 			if(this.operation==aSum || this.operation==aEzSum)
 				newarr.push(this.sets[0].alphaCut(value, i)+this.sets[1].alphaCut(value, j))
-			if(this.operation==aSubtract || this.operation==aEzSub)
+			if(this.operation==aSub || this.operation==aEzSub)
 				newarr.push(this.sets[0].alphaCut(value, i)-this.sets[1].alphaCut(value, j))
-			if(this.operation==aMultiply || this.operation==aEzMul)
+			if(this.operation==aMul || this.operation==aEzMul)
 				newarr.push(this.sets[0].alphaCut(value, i)*this.sets[1].alphaCut(value, j))
-			if(this.operation==aDivide || this.operation == aEzDiv)
+			if(this.operation==aDiv || this.operation == aEzDiv)
 				newarr.push(this.sets[0].alphaCut(value, i)/this.sets[1].alphaCut(value, j))
-			if(this.operation==aRDivide || this.operation == aEzRDiv)
+			if(this.operation==aRDiv || this.operation == aEzRDiv)
 				newarr.push(this.sets[1].alphaCut(value, i)/this.sets[0].alphaCut(value, j))
 		}
 	}
@@ -193,13 +199,13 @@ GLViewport.prototype.getThirdLimits = function(larr, rarr) {
 		{
 			if(this.operation==aSum || this.operation==aEzSum || this.operation==eSum)
 				newarr.push(larr[i]+rarr[j])
-			if(this.operation==aSubtract || this.operation==aEzSub || this.operation==eSubtract)
+			if(this.operation==aSub || this.operation==aEzSub || this.operation==eSub)
 				newarr.push(larr[i]-rarr[j])
-			if(this.operation==aMultiply || this.operation==aEzMul  || this.operation==eMultiply)
+			if(this.operation==aMul || this.operation==aEzMul  || this.operation==eMul)
 				newarr.push(larr[i]*rarr[j])
-			if(this.operation==aDivide || this.operation==aEzDiv || this.operation==eDivide)
+			if(this.operation==aDiv || this.operation==aEzDiv || this.operation==eDiv)
 				newarr.push(larr[i]/rarr[j])
-			if(this.operation == aRDivide || this.operation == aEzRDiv || this.operation==eRDivide)
+			if(this.operation == aRDiv || this.operation == aEzRDiv || this.operation==eRDiv)
 				newarr.push(rarr[j]/larr[i])
 		}
 	
@@ -235,10 +241,10 @@ GLViewport.prototype.alphaOperationData = function(z) {
 
 GLViewport.prototype.getOppositeData = function(newx, x) {
 	if(this.operation == eSum)      return newx - x
-	if(this.operation == eSubtract) return x - newx
-	if(this.operation == eMultiply) return newx / x
-	if(this.operation == eDivide)   return x / newx
-	if(this.operation == eRDivide)  return x * newx
+	if(this.operation == eSub) return x - newx
+	if(this.operation == eMul) return newx / x
+	if(this.operation == eDiv)   return x / newx
+	if(this.operation == eRDiv)  return x * newx
 }
 
 GLViewport.prototype.extensionOperationData = function(z) {
@@ -252,7 +258,7 @@ GLViewport.prototype.extensionOperationData = function(z) {
 	for(i=1; i<fillLimit; i++) {
 		let newx = limits[0] + i/fillLimit*(limits[1]-limits[0])
         let tempdata = []
-        if (Math.abs(newx) < eps && this.operation == eDivide) {
+        if (Math.abs(newx) < eps && this.operation == eDiv) {
             let x1 = 0
             for(j=0; j<=fillLimit; j++) {
                 let x2=set2[0] + j/fillLimit*(set2[1]-set2[0])
@@ -263,7 +269,7 @@ GLViewport.prototype.extensionOperationData = function(z) {
             for(j=0; j<=fillLimit; j++) {
                 let x1=set1[0] + j/fillLimit*(set1[1]-set1[0])
                 let x2
-                if(Math.abs(newx) < eps && this.operation == eRDivide) x2 = 0
+                if(Math.abs(newx) < eps && this.operation == eRDiv) x2 = 0
                 else x2=this.getOppositeData(newx, x1)
                 if (x2 < set2[0] || x2 > set2[1]) continue
                 tempdata.push(Math.min(this.sets[0].muFunction(x1), this.sets[1].muFunction(x2)))
@@ -551,10 +557,10 @@ function changeTypeSelect() {
 
 	operations[0] = [
 		["Sum", aSum],
-		["Subtraction", aSubtract],
-		["Multiplication", aMultiply],
-		["Division(A/B)", aDivide],
-		["Division(B/A)", aRDivide]
+		["Subtraction", aSub],
+		["Multiplication", aMul],
+		["Division(A/B)", aDiv],
+		["Division(B/A)", aRDiv]
 	]
 
 	operations[3] = [
@@ -583,10 +589,10 @@ function changeTypeSelect() {
 
 	operations[2] = [
 		["Sum", eSum],
-		["Subtraction", eSubtract],
-		["Multiplication", eMultiply],
-		["Division(A/B)", eDivide],
-		["Division(B/A)", eRDivide]
+		["Subtraction", eSub],
+		["Multiplication", eMul],
+		["Division(A/B)", eDiv],
+		["Division(B/A)", eRDiv]
 	]
 
 	let val = parseInt(document.getElementById("type").value)
@@ -673,7 +679,10 @@ function generate() {
 
 	vptest.operation = parseInt(document.getElementById("op").value)
 	vptest.opParam = parseFloat(document.getElementById("opParam").value)
-
+	vptest.clearSets()
+	vptest.sets[0] = new FuzzyNum (setType1, arr1)
+    vptest.sets[1] = new FuzzyNum (setType2, arr2)
+    
 	if (checkValues(arr1, setType1) == false) {
 		alert("Invalid values for set 1!")
 		ret = true
@@ -689,11 +698,18 @@ function generate() {
 		ret = true
 	}
 
+    if((vptest.operation==aDiv || vptest.operation==aEzDiv || vptest.operation==eDiv) && vptest.sets[1].containsZero()) {
+        alert("Second set contains a zero, can't divide!")
+		ret = true
+    }
+
+    if((vptest.operation==aRDiv || vptest.operation==aEzRDiv || vptest.operation==eRDiv) && vptest.sets[0].containsZero()) {
+        alert("First set contains a zero, can't divide!")
+		ret = true
+    }
+
 	if (ret) return
 	
-	vptest.clearSets()
-	vptest.sets[0] = new FuzzyNum (setType1, arr1)
-	vptest.sets[1] = new FuzzyNum (setType2, arr2)
 	vptest.draw()
 	document.getElementById("canvas-container").style.display = "flex"
 }
