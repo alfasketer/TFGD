@@ -74,6 +74,10 @@ tr {
 	width:fit-content
 }
 
+#division-check {
+    display: none;
+}
+
 h1 {
 	margin-bottom: 0;
 }

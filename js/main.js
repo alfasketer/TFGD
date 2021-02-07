@@ -620,6 +620,13 @@ function changeTypeSelect() {
 		field.add(option);
 	}
 
+    if (currType==3 || currType==4) {
+        document.getElementById("division-check").style.display = "block"
+    }
+    else {
+        document.getElementById("division-check").style.display = "none"
+    }
+
 	if (val < 5 && lrAllowed) {
 		document.getElementById("set1").remove(3);
 		document.getElementById("set1").remove(3);
@@ -685,6 +692,7 @@ function generate() {
 
 	let setType1 = parseInt(document.getElementById("set1").value)
 	let setType2 = parseInt(document.getElementById("set2").value)
+    let allowDiv = document.getElementById("divisionbox").checked
 
 	vptest.operation = parseInt(document.getElementById("op").value)
 	vptest.opParam = parseFloat(document.getElementById("opParam").value)
@@ -709,12 +717,12 @@ function generate() {
 
     if((vptest.operation==aDiv || vptest.operation==aEzDiv || vptest.operation==eDiv) && vptest.sets[1].containsZero()) {
         alert("Second set contains a zero, can't divide!")
-		ret = true
+		ret = !allowDiv
     }
 
     if((vptest.operation==aRDiv || vptest.operation==aEzRDiv || vptest.operation==eRDiv) && vptest.sets[0].containsZero()) {
         alert("First set contains a zero, can't divide!")
-		ret = true
+		ret = !allowDiv
     }
 
 	if (ret) return
