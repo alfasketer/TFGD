@@ -546,6 +546,8 @@ function changeOpSelect() {
 	if (val==invert) document.getElementById("fset2").style.display = "none"
 	else document.getElementById("fset2").style.display = "block"
 
+	document.getElementById("operation").src = "css/img/operations/" + String(val) + ".png"
+
 	if (val == iYeger || val == iHamacher || val == uYeger || val == uHamacher)
 		document.getElementById("paramBlock").style.display = "block"
 	else document.getElementById("paramBlock").style.display = "none"
