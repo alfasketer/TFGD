@@ -667,7 +667,7 @@ function checkValues(arr, setType) {
 		//Check if every consecutive value is larger than the last
 		let curr = arr[0]
 		for(i = 1; i < lens[setType]; i++) {
-			if(arr[i]<curr) {
+			if(arr[i]<=curr) {
 				check = false
 				break
 			} else {
