@@ -40,6 +40,7 @@ const glPadding = 0.5
 const gausLimit = 160
 const fillLimit = 1200
 const eps       = 0.01
+const logEps    = 0.0001
 const cellSize  = 80
 
 class FuzzyNum {
@@ -78,7 +79,7 @@ FuzzyNum.prototype.alphaCut = function(alpha, side) {
 	}
 	else if (this.type == gausSet) {
 		let loga
-		if (alpha == 0) loga =  Math.log(alpha + eps)
+		if (alpha == 0) loga =  Math.log(alpha + logEps)
 		else loga = Math.log(alpha)
 		let cut = Math.sqrt(-2 * this.points[1] * this.points[1] * loga)
 		if (side == 0) return this.points[0] - cut
@@ -320,7 +321,8 @@ GLViewport.prototype.getIntersectData = function(z) {
 	let data = []
 
 	let step = (this.right-this.left)/fillLimit
-	for (x=this.left; x<=this.right; x+=step) {
+	for (i = 0; i <=fillLimit; i++) {
+		let x = this.left + i*step
 		let y = this.getTNorms(this.sets[0].muFunction(x), this.sets[1].muFunction(x))
 		data.push(x, y, z, x, 0.0, z)
 	}
