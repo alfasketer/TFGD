@@ -721,27 +721,29 @@ function generate() {
     vptest.sets[1] = new FuzzyNum (setType2, arr2)
     
 	if (checkValues(arr1, setType1) == false) {
-		alert("Invalid values for set 1!")
+		if(setType1 == gausSet) alert("Invalid values for set B: b must be larger than 0!")
+		else alert("Invalid values for set B: parameters must be in increasing order!")
 		ret = true
 	}
 
 	if (checkValues(arr2, setType2) == false) {
-		alert("Invalid values for set 2!")
+		if(setType2 == gausSet) alert("Invalid values for set B: b must be over 0!")
+		else alert("Invalid values for set B: parameters must be in increasing order!")
 		ret = true
 	}
 
 	if ((vptest.operation == iYager || vptest.operation == iHamacher || vptest.operation == uYager || vptest.operation == uHamacher || vptest.operation == YagerCompl) && vptest.opParam <= 0) {
-		alert("Invalid parameter!")
+		alert("Invalid parameter: p must be larger than 0!")
 		ret = true
 	}
 
     if((vptest.operation==aDiv || vptest.operation==aEzDiv || vptest.operation==eDiv) && vptest.sets[1].containsZero()) {
-        alert("Second set contains a zero, can't divide!")
+        alert("Set B's support contains a zero, can't divide!")
 		ret = !allowDiv
     }
 
     if((vptest.operation==aRDiv || vptest.operation==aEzRDiv || vptest.operation==eRDiv) && vptest.sets[0].containsZero()) {
-        alert("First set contains a zero, can't divide!")
+        alert("Set A's support contains a zero, can't divide!")
 		ret = !allowDiv
     }
 
