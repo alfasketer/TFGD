@@ -1,40 +1,42 @@
-const triSet    = 0 //triangular fuzzy set
-const trapSet   = 1 //trapezoid fuzzy set
-const gausSet   = 2 //gausian fuzzy set
-const lSet      = 3 //l-function fuzzy set
-const rSet      = 4 //r-function fuzzy set
+const triSet     = 0 //triangular fuzzy set
+const trapSet    = 1 //trapezoid fuzzy set
+const gausSet    = 2 //gausian fuzzy set
+const lSet       = 3 //l-function fuzzy set
+const rSet       = 4 //r-function fuzzy set
 
-const aSum      = 0
-const aSub      = 1
-const aMul      = 2
-const aDiv      = 3
-const aRDiv     = 4
+const aSum       = 0
+const aSub       = 1
+const aMul       = 2
+const aDiv       = 3
+const aRDiv      = 4
 
-const aEzSum    = 10
-const aEzSub    = 11
-const aEzMul    = 12
-const aEzDiv    = 13
-const aEzRDiv   = 14
+const aEzSum     = 10
+const aEzSub     = 11
+const aEzMul     = 12
+const aEzDiv     = 13
+const aEzRDiv    = 14
 
-const eSum      = 20
-const eSub      = 21
-const eMul      = 22
-const eDiv      = 23
-const eRDiv     = 24
+const eSum       = 20
+const eSub       = 21
+const eMul       = 22
+const eDiv       = 23
+const eRDiv      = 24
 
-const intersect = 70
-const iYeger    = 71
-const iProduct  = 72
-const iBProduct = 73
-const iHamacher = 74
+const intersect  = 70
+const iYager     = 71
+const iProduct   = 72
+const iBProduct  = 73
+const iHamacher  = 74
 
-const union     = 80
-const uYeger    = 81
-const uProbSum  = 82
-const uBSum     = 83
-const uHamacher = 84
+const union      = 80
+const uYager     = 81
+const uProbSum   = 82
+const uBSum      = 83
+const uHamacher  = 84
 
-const invert    = 99
+const complement = 99
+const cosCompl   = 100
+const YagerCompl = 101
 
 const glPadding = 0.5
 const gausLimit = 160
@@ -286,7 +288,7 @@ GLViewport.prototype.extensionOperationData = function(z) {
 
 GLViewport.prototype.getTNorms = function(a, b) {
 	if (this.operation == intersect) return Math.min(a, b)
-	if (this.operation == iYeger) {
+	if (this.operation == iYager) {
 		let temp = Math.pow(1-a, this.opParam) + Math.pow(1-b, this.opParam)
 		return 1 - Math.min(1, Math.pow(temp, 1/this.opParam))
 	}
@@ -321,8 +323,7 @@ GLViewport.prototype.getIntersectData = function(z) {
 	let data = []
 
 	let step = (this.right-this.left)/fillLimit
-	for (i = 0; i <=fillLimit; i++) {
-		let x = this.left + i*step
+	for (x=this.left; x<=this.right; x+=step) {
 		let y = this.getTNorms(this.sets[0].muFunction(x), this.sets[1].muFunction(x))
 		data.push(x, y, z, x, 0.0, z)
 	}
@@ -332,7 +333,7 @@ GLViewport.prototype.getIntersectData = function(z) {
 
 GLViewport.prototype.getTConorms = function(a, b) {
 	if (this.operation == union) return Math.max(a, b)
-	if (this.operation == uYeger) {
+	if (this.operation == uYager) {
 		let temp = Math.pow(a, this.opParam) + Math.pow(b, this.opParam)
 		return Math.min(1, Math.pow(temp, 1/this.opParam))
 	}
@@ -365,11 +366,24 @@ GLViewport.prototype.getUnionData = function(z) {
 	return data
 }
 
-GLViewport.prototype.getInvertData = function(z) {
-	let data = this.sets[0].getData(z)
-	for(i=1; i<data.length; i+=3) {
-		data[i] = 1-data[i]
+GLViewport.prototype.getComplement = function(x) {
+	if(this.operation == complement) return 1-x
+	if(this.operation == cosCompl) return (1+Math.cos(x * Math.PI))/2
+	if(this.operation == YagerCompl) {
+		let temp = 1 - Math.pow(x, this.opParam)
+		return Math.pow(temp, 1/this.opParam)
 	}
+}
+
+GLViewport.prototype.getComplementData = function(z) {
+	data = []
+
+	let step = (this.right-this.left)/fillLimit
+	for (x=this.left; x<=this.right; x+=step) {
+		let y = this.getComplement(this.sets[0].muFunction(x))
+		data.push(x, y, z)
+	}
+
 	return data
 }
 
@@ -378,8 +392,8 @@ GLViewport.prototype.getOperationData = function(z) {
 	if (this.operation < eSum) return this.alphaOperationData(z)
 	if (this.operation < intersect) return this.extensionOperationData(z)
 	if (this.operation < union) return this.getIntersectData(z)
-	if (this.operation < invert) return this.getUnionData(z)
-	if (this.operation == invert) return this.getInvertData(z)
+	if (this.operation < complement) return this.getUnionData(z)
+	return this.getComplementData(z)
 }
 
 GLViewport.prototype.addSet = function(set) {
@@ -404,7 +418,7 @@ GLViewport.prototype.setViewport = function() {
 	let larr = [set1[0]]
 	let rarr = [set1[1]]
 
-	if(this.operation != invert) {
+	if(this.operation < complement) {
 		larr.push(set2[0])
 		rarr.push(set2[1])
 	}
@@ -511,7 +525,7 @@ GLViewport.prototype.draw = function() {
 	this.drawSet(0)
 
 	// второ множество
-	if (this.operation != invert) this.drawSet(1)
+	if (this.operation < complement) this.drawSet(1)
 }
 
 function changeSetSelect(i) {
@@ -545,12 +559,12 @@ function changeSetSelect(i) {
 
 function changeOpSelect() {
 	let val = parseInt(document.getElementById("op").value)
-	if (val==invert) document.getElementById("fset2").style.display = "none"
+	if (val>=complement) document.getElementById("fset2").style.display = "none"
 	else document.getElementById("fset2").style.display = "block"
 
 	document.getElementById("operation").src = "css/img/operations/" + String(val) + ".png"
 
-	if (val == iYeger || val == iHamacher || val == uYeger || val == uHamacher)
+	if (val == iYager || val == iHamacher || val == uYager || val == uHamacher || val == YagerCompl)
 		document.getElementById("paramBlock").style.display = "block"
 	else document.getElementById("paramBlock").style.display = "none"
 }
@@ -589,23 +603,25 @@ function changeTypeSelect() {
     ]
 
 	operations[5] = [
-		["Min Intersect", intersect],
-		["Yeger Intersect", iYeger],
-		["Product Intersect", iProduct],
+		["Standart (Min) Intersect", intersect],
+		["Yager Intersect", iYager],
+		["Algebraic Product Intersect", iProduct],
 		["Bounded Product Intersect", iBProduct],
 		["Hamacher Intersect", iHamacher]
     ]
     
     operations[6] = [
-		["Max Union", union],
-		["Yeger Union", uYeger],
+		["Standart (Max) Union", union],
+		["Yager Union", uYager],
 		["Probalistic Sum Union", uProbSum],
 		["Bounded Sum Union", uBSum],
 		["Hamacher Union", uHamacher]
     ]
 
     operations[7] = [
-		["Inversion", invert]
+		["Standart Complement", complement],
+		["Cos Complement", cosCompl],
+		["Yager Inversion", YagerCompl]
     ]
 
 	let val = parseInt(document.getElementById("type").value)
@@ -714,7 +730,7 @@ function generate() {
 		ret = true
 	}
 
-	if ((vptest.operation == iYeger || vptest.operation == iHamacher || vptest.operation == uYeger || vptest.operation == uHamacher) && vptest.opParam <= 0) {
+	if ((vptest.operation == iYager || vptest.operation == iHamacher || vptest.operation == uYager || vptest.operation == uHamacher || vptest.operation == YagerCompl) && vptest.opParam <= 0) {
 		alert("Invalid parameter!")
 		ret = true
 	}
