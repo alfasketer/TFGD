@@ -255,10 +255,13 @@ GLViewport.prototype.extensionOperationData = function(z) {
 	let set2 = [this.sets[1].alphaCut(0, 0), this.sets[1].alphaCut(0, 1)]
 	let limits = this.getThirdLimits(set1, set2)
 
-	let data = []
-	data.push(-999.0, 0.0, z, limits[0], 0.0, z)
+	if(this.operation == eDiv && this.sets[1].containsZero()) limits = [this.left, this.right]
+	if(this.operation == eRDiv && this.sets[0].containsZero()) limits = [this.left, this.right]
 
-	for(i=1; i<fillLimit; i++) {
+	let data = []
+	data.push(-999.0, 0.0, z)
+
+	for(i=0; i<=fillLimit; i++) {
 		let newx = limits[0] + i/fillLimit*(limits[1]-limits[0])
         let tempdata = []
         if (Math.abs(newx) < eps && this.operation == eDiv) {
@@ -274,14 +277,14 @@ GLViewport.prototype.extensionOperationData = function(z) {
                 let x2
                 if(Math.abs(newx) < eps && this.operation == eRDiv) x2 = 0
                 else x2=this.getOppositeData(newx, x1)
-                if (x2 < set2[0] || x2 > set2[1]) continue
+                //if (x2 < set2[0] || x2 > set2[1]) continue
                 tempdata.push(Math.min(this.sets[0].muFunction(x1), this.sets[1].muFunction(x2)))
             }
         }
 		data.push(newx, Math.max.apply(Math, tempdata), z)
 	}
 
-	data.push(limits[1], 0.0, z, 999.0, 0.0, z)
+	data.push(999.0, 0.0, z)
 
 	return data
 }
