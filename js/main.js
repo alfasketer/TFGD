@@ -613,7 +613,7 @@ function changeTypeSelect() {
     operations[6] = [
 		["Standart (Max) Union", union],
 		["Yager Union", uYager],
-		["Probalistic Sum Union", uProbSum],
+		["Probabilistic Sum Union", uProbSum],
 		["Bounded Sum Union", uBSum],
 		["Hamacher Union", uHamacher]
     ]
